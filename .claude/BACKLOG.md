@@ -7,7 +7,7 @@
 
 ## En progreso
 
-<!-- ninguna -->
+<!-- vacío -->
 
 ---
 

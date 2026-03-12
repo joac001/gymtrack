@@ -20,6 +20,7 @@ export default function Header({ userName, userImage }: HeaderProps) {
     { href: "/rutinas", label: "Rutinas" },
     { href: "/historial", label: "Historial" },
     { href: "/estadisticas", label: "Estadísticas" },
+    { href: "/importar", label: "Importar" },
   ];
 
   useEffect(() => {
