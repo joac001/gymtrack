@@ -20,7 +20,6 @@ export default function Header({ userName, userImage }: HeaderProps) {
     { href: "/rutinas", label: "Rutinas" },
     { href: "/historial", label: "Historial" },
     { href: "/estadisticas", label: "Estadísticas" },
-    { href: "/importar", label: "Importar" },
   ];
 
   useEffect(() => {
@@ -121,6 +120,17 @@ export default function Header({ userName, userImage }: HeaderProps) {
                 </div>
 
                 {/* Opciones */}
+                <Link
+                  href="/configuracion"
+                  onClick={() => setMenuOpen(false)}
+                  className="block w-full text-left px-2.5 py-2 text-[0.85rem] font-medium no-underline"
+                  style={{
+                    borderRadius: "var(--radius-sm)",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  Configuración
+                </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="block w-full text-left px-2.5 py-2 text-[0.85rem] font-medium cursor-pointer"

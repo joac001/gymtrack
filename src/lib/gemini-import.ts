@@ -124,15 +124,20 @@ Tu tarea es analizar el contenido del Excel y mapearlo al schema de la app GymTr
 
 ## Reglas de extracción
 1. Normalizá nombres de ejercicios: si "Press banca", "Bench press", "P.Banca" aparecen juntos, usá el nombre más descriptivo en español.
-2. Si hay pesos en lbs (magnitud >100 para ejercicios comunes), asumí lbs.
-3. Si hay decimales con coma ("82,5"), conver tilos a punto.
+2. **Unidad de pesos — OBLIGATORIO:**
+   - Los pesos en la base de datos se guardan SIEMPRE en kg.
+   - Si el Excel tiene pesos claramente en lbs (bench >100kg, squat >150kg, OHP >70kg, peso corporal >130kg, o indica "lbs" explícitamente), convertí todos los pesos multiplicando por 0.453592 ANTES de incluirlos en el JSON.
+   - Si los pesos parecen lbs pero no estás seguro, preguntá al usuario con tipo "boolean": "¿Los pesos del Excel están en libras (lbs)?"
+   - Nunca incluyas pesos sin convertir si detectaste o sospechás que son lbs.
+3. Si hay decimales con coma ("82,5"), convertílos a punto.
 4. "BW", "propio", "bodyweight" → peso = 0.
 5. Fórmulas de sets: "4x10" = 4 series de 10 reps; "3-4x8-12" = 3-4 series de 8-12 reps.
 6. Si no hay fechas, usar fechaIndice (1, 2, 3...) en orden cronológico.
-7. Si los datos de historial no hacen referencia a una rutina, crear una rutina "Rutina importada" con las sesiones detectadas.
+7. **Nombre de la rutina — OBLIGATORIO:** Inferí un nombre descriptivo y específico a partir del contenido del Excel. Ejemplos: "Push Pull Legs Verano", "Fullbody 3 días", "Fuerza Upper/Lower", "Hipertrofia 5 días". Usá el nombre del archivo, contexto de las sesiones, número de días o tipo de split para crear algo significativo. Solo usá "Rutina importada" como último recurso si no hay absolutamente ningún contexto.
 8. Descartá cardio (running, caminadora, cycling, etc.) y medidas corporales.
 9. Descartá filas claramente de prueba o sin sentido.
 10. Si detectás datos de múltiples personas, importá solo los primeros que aparezcan y mencionalo en las preguntas.
+11. **Días de la semana — OBLIGATORIO:** Si las sesiones usan nombres ambiguos como "Día A", "Día B", "Día 1", letras (A/B/C), números, o cualquier identificador que NO sea un día de semana concreto (lunes, martes, etc.), SIEMPRE preguntá al usuario qué días corresponden a cada sesión. Nunca inventes ni asumas días si no están explícitos. Usá tipo "text" y preguntá ej: "¿Qué día de la semana entrenás el Día A?"
 
 ## Formato de respuesta (JSON puro, sin markdown)
 
@@ -177,7 +182,7 @@ export async function callGeminiImport(
   if (!apiKey) throw new Error("GEMINI_API_KEY no configurada");
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
   // Construir el prompt con el excel + historial de respuestas anteriores
   let userMessage = `Analizá este archivo Excel:\n\n${excelText}`;

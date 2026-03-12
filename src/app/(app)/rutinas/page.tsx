@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Table } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
@@ -44,17 +45,31 @@ export default function RutinasPage() {
         >
           MIS RUTINAS
         </h1>
-        <Link
-          href="/rutinas/nueva"
-          className="text-[0.9rem] font-semibold no-underline px-4 py-2"
-          style={{
-            background: "var(--push)",
-            color: "#fff",
-            borderRadius: "var(--radius-md)",
-          }}
-        >
-          + Nueva
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/importar"
+            className="text-[0.9rem] font-semibold no-underline px-4 py-2"
+            style={{
+              background: "#16a34a",
+              color: "#fff",
+              borderRadius: "var(--radius-md)",
+            }}
+          >
+            <Table size={15} strokeWidth={2.5} style={{ display: "inline", verticalAlign: "middle", marginRight: "5px", marginTop: "-2px" }} />
+            Subir Excel
+          </Link>
+          <Link
+            href="/rutinas/nueva"
+            className="text-[0.9rem] font-semibold no-underline px-4 py-2"
+            style={{
+              background: "var(--push)",
+              color: "#fff",
+              borderRadius: "var(--radius-md)",
+            }}
+          >
+            + Nueva
+          </Link>
+        </div>
       </div>
 
       <Suspense fallback={<RutinasSkeleton />}>

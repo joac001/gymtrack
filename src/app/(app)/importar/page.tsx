@@ -58,19 +58,23 @@ export default function ImportarPage() {
 
       const data = await res.json() as {
         excelBase64: string;
-        result: { status: string; preguntas?: PreguntaImport[]; rutinas?: RutinaImport[]; logs?: LogImport[]; ajustes?: AjusteMenor[] };
+        status: string;
+        preguntas?: PreguntaImport[];
+        rutinas?: RutinaImport[];
+        logs?: LogImport[];
+        ajustes?: AjusteMenor[];
       };
 
       setExcelBase64(data.excelBase64);
 
-      if (data.result.status === "needs_more_info") {
-        setPreguntasActuales(data.result.preguntas ?? []);
+      if (data.status === "needs_more_info") {
+        setPreguntasActuales(data.preguntas ?? []);
         setRonda(1);
         setPaso("preguntas");
-      } else if (data.result.status === "ready") {
-        setRutinas(data.result.rutinas ?? []);
-        setLogs(data.result.logs ?? []);
-        setAjustes(data.result.ajustes ?? []);
+      } else if (data.status === "ready") {
+        setRutinas(data.rutinas ?? []);
+        setLogs(data.logs ?? []);
+        setAjustes(data.ajustes ?? []);
         setPaso("review");
       }
     } catch (err) {
@@ -108,17 +112,21 @@ export default function ImportarPage() {
 
       const data = await res.json() as {
         excelBase64: string;
-        result: { status: string; preguntas?: PreguntaImport[]; rutinas?: RutinaImport[]; logs?: LogImport[]; ajustes?: AjusteMenor[] };
+        status: string;
+        preguntas?: PreguntaImport[];
+        rutinas?: RutinaImport[];
+        logs?: LogImport[];
+        ajustes?: AjusteMenor[];
       };
 
-      if (data.result.status === "needs_more_info") {
-        setPreguntasActuales(data.result.preguntas ?? []);
+      if (data.status === "needs_more_info") {
+        setPreguntasActuales(data.preguntas ?? []);
         setRonda((r) => r + 1);
         // (el paso sigue siendo "preguntas")
-      } else if (data.result.status === "ready") {
-        setRutinas(data.result.rutinas ?? []);
-        setLogs(data.result.logs ?? []);
-        setAjustes(data.result.ajustes ?? []);
+      } else if (data.status === "ready") {
+        setRutinas(data.rutinas ?? []);
+        setLogs(data.logs ?? []);
+        setAjustes(data.ajustes ?? []);
         setPaso("review");
       }
     } catch (err) {
@@ -227,7 +235,7 @@ export default function ImportarPage() {
           <div className="flex flex-col gap-2 w-full">
             <button
               type="button"
-              onClick={() => router.push("/rutina")}
+              onClick={() => router.push("/rutinas")}
               className="w-full py-3.5 text-[0.9rem] font-bold uppercase tracking-wider cursor-pointer"
               style={{
                 background: "var(--push)",
