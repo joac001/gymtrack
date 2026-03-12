@@ -9,7 +9,23 @@ Antes de modificar cualquier schema, actualizá este documento.
 
 - **userId** se almacena como `String` en todos los modelos propios. Es el string del ObjectId que NextAuth guarda en el JWT (`session.user.id`). No usamos `ObjectId` con `ref` porque el modelo `User` lo gestiona el adapter de NextAuth, no Mongoose.
 - **Estructura embebida**: sesiones y ejercicios viven dentro del documento `Routine`, no en colecciones separadas. Se consultan siempre juntos y nunca de forma independiente.
-- **Desnormalización en logs**: al registrar un entrenamiento se copian `sesionNombre`, `sesionTipo` y `ejercicios[].nombre`. Si el usuario edita la rutina después, el historial refleja lo que realmente hizo.
+- **Desnormalización en logs**: al registrar un entrenamiento se copian `sesionNombre`, `sesionColor` y `ejercicios[].nombre`. Si el usuario edita la rutina después, el historial refleja lo que realmente hizo.
+
+---
+
+## User
+
+El modelo `User` usa la misma colección `users` que gestiona el adapter de NextAuth. Solo se definen los campos propios de GymTrack; el resto (name, email, image, etc.) lo administra NextAuth. El schema usa `strict: false`.
+
+```
+User {
+  _id: ObjectId                     ← usado como session.user.id (string)
+  unidadPeso: "kg" | "lbs"          ← preferencia de unidad de peso, default "kg"
+  // Campos de NextAuth: name, email, image, emailVerified, ...
+}
+```
+
+**Regla:** los pesos se almacenan **siempre en kg** en MongoDB. La conversión a la unidad preferida del usuario se hace en la capa de presentación.
 
 ---
 
@@ -37,15 +53,18 @@ Routine {
         {
           _id: ObjectId (auto)
           nombre: String            ← ej: "Press Banca"
-          series: Number            ← ej: 4
-          reps: {
+          grupo?: String            ← grupo muscular, ej: "Pecho", "Espalda"
+          tipoMedida: 'reps' | 'tiempo'  ← tipo de medición del ejercicio
+          series?: Number           ← ej: 4 (opcional para tipo 'tiempo')
+          reps?: {
             desde: Number           ← requerido; ej: 10 (fijo) u 8 (inicio de rango)
             hasta?: Number          ← opcional; si existe, es el tope del rango
           }
-          // Ejemplos de display:
+          // Ejemplos de display (tipoMedida: 'reps'):
           // { desde: 10 }          → "10 reps"
           // { desde: 8, hasta: 10} → "8-10 reps"
 
+          duracion?: String         ← para tipoMedida: 'tiempo', ej: "30s", "1min"
           notas?: String            ← ej: "Bajar lento, 3 seg excéntrica"
           orden: Number
         }
@@ -79,6 +98,7 @@ WorkoutLog {
   sesionNombre: String              ← copia del nombre al momento del log
   sesionColor: String               ← copia del color hex (para colores en historial)
   fecha: Date                       ← fecha del entrenamiento
+  notasPre?: String                 ← notas previas al entrenamiento (condición física, etc.)
 
   ejercicios: [
     {

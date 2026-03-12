@@ -6,11 +6,16 @@ Para cada ejercicio se incluye un link a búsqueda de imágenes (Google Images) 
 
 ## Tech Stack
 
-- **Framework**: Next.js (App Router)
-- **Estilos**: Tailwind CSS
-- **Base de datos**: MongoDB Atlas (plan M0 gratuito)
-- **Auth**: NextAuth.js con MongoDB Adapter (email + password)
+- **Framework**: Next.js 16 (App Router)
+- **Estilos**: Tailwind CSS v4
+- **Base de datos**: MongoDB Atlas (plan M0 gratuito) + Mongoose
+- **Auth**: NextAuth.js v5 beta con MongoDB Adapter (Google OAuth)
 - **Deploy**: Vercel
+- **Drag & drop**: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`
+- **Gráficos**: `@nivo/line`, `@nivo/bar`, `@nivo/calendar`
+- **Íconos**: `lucide-react`
+- **IA (import)**: `@google/generative-ai` (Gemini 2.5 Flash Lite)
+- **Excel (import)**: `exceljs`
 
 ## Usuarios
 
@@ -33,7 +38,8 @@ Las rutinas son **editables**: cada usuario crea y gestiona sus propias rutinas 
    - Racha y consistencia (semanas seguidas, días por mes)
    - Volumen total por sesión (peso × reps × series)
 4. **Rutinas editables**: CRUD de sesiones y ejercicios
-5. **Links a imágenes**: Cada ejercicio linkea a búsqueda de Google Images
+5. **Links a imágenes**: Cada ejercicio linkea a búsqueda de Google Images _(pendiente de implementar)_
+6. **Importar desde Excel**: el usuario sube un `.xlsx` con su rutina/historial preexistente. Gemini interpreta el contenido en una conversación de hasta 3 rondas de preguntas, luego muestra un resumen para confirmar antes de guardar. Crea las rutinas e importa los logs históricos.
 
 ## Design System
 
@@ -44,9 +50,13 @@ Las rutinas son **editables**: cada usuario crea y gestiona sus propias rutinas 
 - **Surface**: `#161617`
 - **Border**: `#252527`
 - **Text**: `#e8e8e8` / Muted: `#6b6b72`
-- **Push (naranja)**: `#f97316` / accent bg: `rgba(249,115,22,0.08)`
+- **Push (naranja-rojo)**: `#f4634a` / accent bg: `rgba(244,99,74,0.08)`
 - **Pull (azul)**: `#3b82f6` / accent bg: `rgba(59,130,246,0.08)`
 - **Legs (verde)**: `#22c55e` / accent bg: `rgba(34,197,94,0.08)`
+- **Success**: `#22c55e` / bg: `rgba(34,197,94,0.08)`
+- **Warning**: `#f59e0b` / bg: `rgba(245,158,11,0.08)`
+- **Danger**: `#ef4444` / bg: `rgba(239,68,68,0.08)`
+- **Radius**: `--radius-sm: 6px` / `--radius-md: 10px` / `--radius-lg: 16px`
 
 ### Tipografía
 
@@ -80,9 +90,56 @@ El archivo `.claude/BACKLOG.md` es la fuente de verdad de todas las tareas pendi
 
 ---
 
+## Feature: Configuración de usuario
+
+Ruta: `/configuracion`. Permite al usuario elegir su **unidad de peso preferida**: kg o lbs.
+
+**Regla clave:** los pesos se almacenan **siempre en kg** en MongoDB. La conversión a lbs ocurre solo en la capa de presentación.
+
+**Archivos clave:**
+
+- `src/app/(app)/configuracion/page.tsx` — Server Component, lee `unidadPeso` del modelo `User` y pasa el valor al selector
+- `src/app/api/user/settings/route.ts` — GET (obtener `unidadPeso` actual) + PATCH (actualizarlo; valida que sea "kg" o "lbs")
+- `src/components/configuracion/UnidadPesoSelector.tsx` — Client Component con dos botones (kg / lbs), feedback visual "Guardando..." / "Guardado ✓" vía `useTransition`
+- `src/lib/unidades.ts` — utilidades de conversión usadas en toda la app:
+  - `convertirPeso(kg, unidad): number` — convierte kg a la unidad, redondeado a 1 decimal
+  - `formatPeso(kg, unidad): string` — devuelve string listo para mostrar, ej: `"82.5 kg"` / `"181.9 lbs"`
+
+**Integración:** `convertirPeso` / `formatPeso` se usan en todos los componentes que muestran pesos: `LogCard`, `EjercicioCard`, `EntrenarForm`, `PesoChart`, `VolumenChart`, `HistorialList`, página de detalle de historial.
+
+---
+
+## Feature: Importar desde Excel (IA)
+
+Ruta: `/importar`. Flujo en 4 pasos:
+
+1. **Upload** (`UploadStep`) — el usuario sube un `.xlsx`
+2. **Preguntas** (`PreguntasStep`) — Gemini puede devolver hasta 3 rondas de preguntas si le falta contexto (fechas, unidades, etc.)
+3. **Review** (`ReviewStep`) — muestra el resumen de rutinas y logs detectados + ajustes menores (ej: intensidad por defecto). El usuario confirma.
+4. **Éxito** — se crean las rutinas y logs en MongoDB.
+
+**Archivos clave:**
+
+- `src/lib/excel-parser.ts` — parsea `.xlsx` a texto tabulado por sheet (vía `exceljs`)
+- `src/lib/gemini-import.ts` — system prompt, tipos compartidos (`RutinaImport`, `LogImport`, etc.), función `callGeminiImport`
+- `src/app/api/import/chat/route.ts` — recibe archivo o `excelBase64` + historial, llama a Gemini, devuelve preguntas o resultado
+- `src/app/api/import/confirm/route.ts` — recibe rutinas + logs confirmados, los persiste en MongoDB
+- `src/components/importar/` — `UploadStep`, `PreguntasStep`, `ReviewStep`
+
+**Modelo Gemini:** `gemini-2.5-flash-lite` (baja temperatura para JSON estructurado)
+
+**Reglas de negocio:**
+
+- Límite de 3 rondas de conversación
+- El texto del Excel se pasa como `excelBase64` en rondas 2 y 3 (no se re-sube el archivo)
+- Rutinas importadas se crean con `activa: false`
+- Logs sin fecha usan `fechaIndice` para calcular fechas aproximadas desde una fecha base
+
+---
+
 ## Estructura de componentes
 
-Todos los componentes reutilizables de UI viven en `components/ui/` (Button, Input, Modal, Card, Badge, etc.). Las páginas los importan desde ahí y nunca duplican implementaciones. Cada feature tiene sus propios componentes específicos en `components/[feature]/`.
+Todos los componentes reutilizables de UI viven en `components/ui/` (Button, Input, Skeleton, etc.). Las páginas los importan desde ahí y nunca duplican implementaciones. Cada feature tiene sus propios componentes específicos en `components/[feature]/`.
 
 ```
 components/
@@ -102,7 +159,8 @@ Toda pantalla se modulariza en componentes. No hay páginas monolíticas.
 - App Router de Next.js (carpeta `app/`)
 - Server Components por defecto, Client Components solo cuando sea necesario
 - API routes en `app/api/`
-- Variables de entorno: `MONGODB_URI`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
+- Variables de entorno: `MONGODB_URI`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GEMINI_API_KEY`
+- En Next.js 16 el middleware se llama `proxy.ts` (no `middleware.ts`) y debe exportarse como `export const proxy = ...`
 
 ## Loading states
 

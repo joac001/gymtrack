@@ -10,7 +10,14 @@
       "Edit(.claude/BACKLOG.md)",
       "Bash(ls c:/Users/joaco/Desktop/Projects/gymtrack/.env*)",
       "Bash(npx tsc:*)",
-      "Bash(npx kill-port:*)"
+      "Bash(npx kill-port:*)",
+      "Bash(find src:*)",
+      "Bash(sed -i 's/- `P1` \\\\*\\\\*Modelo User: agregar campo `unidadPeso: \"\"kg\"\" | \"\"lbs\"\"`\\\\*\\\\* _\\(Sprint 2\\)_/- `P1` **API `PATCH \\\\/api\\\\/user\\\\/settings`** _\\(Sprint 2\\)_/' \"c:/Users/joaco/Desktop/Projects/gymtrack/.claude/BACKLOG.md\")",
+      "Bash(sed -i '/- `P1` \\\\*\\\\*Modelo User: agregar campo/d' \"c:/Users/joaco/Desktop/Projects/gymtrack/.claude/BACKLOG.md\")",
+      "Bash(sed -i 's/- `P1` \\\\*\\\\*API `PATCH \\\\/api\\\\/user\\\\/settings`\\\\*\\\\* _\\(Sprint 2\\)_/- `P1` **Pantalla de configuración `\\\\/configuracion`** _\\(Sprint 2\\)_/' \"c:/Users/joaco/Desktop/Projects/gymtrack/.claude/BACKLOG.md\")",
+      "Bash(grep -n \"API \\\\`PATCH\" \"c:/Users/joaco/Desktop/Projects/gymtrack/.claude/BACKLOG.md\")",
+      "Bash(mkdir -p \"c:/Users/joaco/Desktop/Projects/gymtrack/src/app/api/routines/[id]/sesiones/[sesionId]\")",
+      "Bash(mkdir -p \"c:/Users/joaco/Desktop/Projects/gymtrack/src/app/api/routines/[id]/sesiones/[sesionId]/ejercicios/[ejId]\")"
     ]
   }
 }
