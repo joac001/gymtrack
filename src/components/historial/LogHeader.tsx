@@ -1,4 +1,5 @@
 import { getIntensidad, intensidadLabel } from "./intensidad";
+import { convertirPeso } from "@/lib/unidades";
 
 export interface LogHeaderData {
   sesionNombre: string;
@@ -10,7 +11,7 @@ export interface LogHeaderData {
   notas?: string | null;
 }
 
-export default function LogHeader({ log }: { log: LogHeaderData }) {
+export default function LogHeader({ log, unidadPeso = "kg" }: { log: LogHeaderData; unidadPeso?: "kg" | "lbs" }) {
   const color = log.sesionColor;
   const { emoji, color: intColor } = getIntensidad(log.intensidad);
 
@@ -92,7 +93,7 @@ export default function LogHeader({ log }: { log: LogHeaderData }) {
           </p>
           <p className="text-[1.1rem] font-bold m-0" style={{ color: "var(--text)" }}>
             {log.volumenTotal > 0
-              ? `${log.volumenTotal.toLocaleString("es-AR")} kg`
+              ? `${convertirPeso(log.volumenTotal, unidadPeso).toLocaleString("es-AR")} ${unidadPeso}`
               : "—"}
           </p>
         </div>

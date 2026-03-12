@@ -2,9 +2,11 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { connectDB } from "@/lib/mongodb";
 import WorkoutLog from "@/models/WorkoutLog";
+import User from "@/models/User";
 import StatsPageClient from "@/components/estadisticas/StatsPageClient";
 import type { EjercicioData } from "@/components/estadisticas/PesoChart";
 import type { SesionFrecuencia } from "@/components/estadisticas/FrecuenciaChart";
+import { convertirPeso } from "@/lib/unidades";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -97,10 +99,12 @@ export default async function EstadisticasPage() {
 
   await connectDB();
 
-  // Todos los logs ordenados cronológicamente
-  const logs = await WorkoutLog.find({ userId: session.user.id })
-    .sort({ fecha: 1 })
-    .lean();
+  const userId = session.user.id;
+  const [logs, userDoc] = await Promise.all([
+    WorkoutLog.find({ userId }).sort({ fecha: 1 }).lean(),
+    User.findById(userId).lean(),
+  ]);
+  const unidadPeso = ((userDoc as { unidadPeso?: string } | null)?.unidadPeso ?? "kg") as "kg" | "lbs";
 
   if (logs.length === 0) {
     return (
@@ -159,7 +163,7 @@ export default async function EstadisticasPage() {
   const ultimas12 = todasSemanas.slice(-12);
   const volumenSemanal = ultimas12.map((s) => ({
     semana: isoWeekLabel(s),
-    volumen: volumenPorSemana.get(s) ?? 0,
+    volumen: convertirPeso(volumenPorSemana.get(s) ?? 0, unidadPeso),
   }));
 
   // ── Progreso de peso por ejercicio ────────────────────────────────────────
@@ -195,7 +199,7 @@ export default async function EstadisticasPage() {
       id,
       nombre: v.nombre,
       color: v.color,
-      datos: [...v.puntos.entries()].map(([x, y]) => ({ x, y })),
+      datos: [...v.puntos.entries()].map(([x, y]) => ({ x, y: convertirPeso(y, unidadPeso) })),
     }));
 
   // ── Intensidad percibida (últimas 20 sesiones con intensidad) ─────────────
@@ -242,6 +246,7 @@ export default async function EstadisticasPage() {
         ejercicios={ejercicios}
         intensidad={intensidad}
         frecuencia={frecuencia}
+        unidadPeso={unidadPeso}
       />
     </main>
   );

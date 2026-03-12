@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getIntensidad } from "./intensidad";
+import { convertirPeso } from "@/lib/unidades";
 
 export interface LogCardData {
   id: string;
@@ -21,7 +22,7 @@ function formatFecha(date: Date) {
   });
 }
 
-export default function LogCard({ log }: { log: LogCardData }) {
+export default function LogCard({ log, unidadPeso = "kg" }: { log: LogCardData; unidadPeso?: "kg" | "lbs" }) {
   const { emoji, color: intColor } = getIntensidad(log.intensidad);
 
   return (
@@ -55,7 +56,7 @@ export default function LogCard({ log }: { log: LogCardData }) {
               </span>
             )}
             {formatFecha(log.fecha)} · {log.ejerciciosCount} ejercicios
-            {log.volumen > 0 && ` · ${log.volumen.toLocaleString("es-AR")} kg`}
+            {log.volumen > 0 && ` · ${convertirPeso(log.volumen, unidadPeso).toLocaleString("es-AR")} ${unidadPeso}`}
           </p>
         </div>
 

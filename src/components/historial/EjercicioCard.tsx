@@ -1,3 +1,5 @@
+import { convertirPeso } from "@/lib/unidades";
+
 export interface EjercicioCardData {
   nombre: string;
   esExtra: boolean;
@@ -8,10 +10,13 @@ interface Props {
   ejercicio: EjercicioCardData;
   index: number;
   sesionColor: string;
+  unidadPeso?: "kg" | "lbs";
 }
 
-export default function EjercicioCard({ ejercicio, index, sesionColor }: Props) {
-  const volEj = ejercicio.sets.reduce((s, set) => s + set.reps * set.peso, 0);
+export default function EjercicioCard({ ejercicio, index, sesionColor, unidadPeso = "kg" }: Props) {
+  // volumen siempre en kg (base) para cálculo interno, convertir solo al mostrar
+  const volEjKg = ejercicio.sets.reduce((s, set) => s + set.reps * set.peso, 0);
+  const volEj = convertirPeso(volEjKg, unidadPeso);
   const color = ejercicio.esExtra ? undefined : sesionColor;
 
   return (
@@ -50,7 +55,7 @@ export default function EjercicioCard({ ejercicio, index, sesionColor }: Props) 
         {/* Volumen */}
         {volEj > 0 && (
           <span className="text-[0.75rem] font-medium" style={{ color: "var(--text-muted)" }}>
-            {volEj.toLocaleString("es-AR")} kg
+            {volEj.toLocaleString("es-AR")} {unidadPeso}
           </span>
         )}
 
@@ -86,14 +91,14 @@ export default function EjercicioCard({ ejercicio, index, sesionColor }: Props) 
                 </span>
                 <span style={{ color: "var(--text-muted)" }}>×</span>
                 <span className="font-semibold" style={{ color: "var(--text)" }}>
-                  {set.peso} kg
+                  {convertirPeso(set.peso, unidadPeso)} {unidadPeso}
                 </span>
                 {set.peso > 0 && (
                   <span
                     className="text-[0.75rem] ml-auto"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {(set.reps * set.peso).toLocaleString("es-AR")} kg vol
+                    {convertirPeso(set.reps * set.peso, unidadPeso).toLocaleString("es-AR")} {unidadPeso} vol
                   </span>
                 )}
               </div>

@@ -10,9 +10,10 @@ const ResponsiveBar = dynamic(
 
 interface Props {
   data: { semana: string; volumen: number }[];
+  unidadPeso?: "kg" | "lbs";
 }
 
-export default function VolumenChart({ data }: Props) {
+export default function VolumenChart({ data, unidadPeso = "kg" }: Props) {
   return (
     <div style={{ height: 200 }}>
       <ResponsiveBar
@@ -49,7 +50,7 @@ export default function VolumenChart({ data }: Props) {
           >
             <strong>{indexValue}</strong>
             <br />
-            {value.toLocaleString("es-AR")} kg vol
+            {value.toLocaleString("es-AR")} {unidadPeso} vol
           </div>
         )}
       />

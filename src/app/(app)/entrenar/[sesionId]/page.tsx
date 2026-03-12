@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import Routine from "@/models/Routine";
 import WorkoutLog from "@/models/WorkoutLog";
+import User from "@/models/User";
 import EntrenarForm from "@/components/entrenar/EntrenarForm";
 
 type Props = {
@@ -22,7 +23,11 @@ export default async function EntrenarPage({ params, searchParams }: Props) {
 
   await connectDB();
 
-  const rutina = await Routine.findOne({ _id: rutinaId, userId }).lean();
+  const [rutina, userDoc] = await Promise.all([
+    Routine.findOne({ _id: rutinaId, userId }).lean(),
+    User.findById(userId).lean(),
+  ]);
+  const unidadPeso = ((userDoc as { unidadPeso?: string } | null)?.unidadPeso ?? "kg") as "kg" | "lbs";
   if (!rutina) notFound();
 
   const sesion = rutina.sesiones.find((s) => s._id.toString() === sesionId);
@@ -100,7 +105,7 @@ export default async function EntrenarPage({ params, searchParams }: Props) {
         )}
       </div>
 
-      <EntrenarForm sesion={sesionData} ultimosLogs={ultimosLogs} />
+      <EntrenarForm sesion={sesionData} ultimosLogs={ultimosLogs} unidadPeso={unidadPeso} />
     </div>
   );
 }

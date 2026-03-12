@@ -19,6 +19,7 @@ interface Props {
   ejercicios: EjercicioData[];
   intensidad: { x: string; y: number }[];
   frecuencia: SesionFrecuencia[];
+  unidadPeso?: "kg" | "lbs";
 }
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -54,6 +55,7 @@ export default function StatsPageClient({
   ejercicios,
   intensidad,
   frecuencia,
+  unidadPeso = "kg",
 }: Props) {
   return (
     <div className="flex flex-col gap-4">
@@ -76,12 +78,12 @@ export default function StatsPageClient({
 
       {/* Volumen semanal */}
       <SectionCard title="Volumen semanal">
-        <VolumenChart data={volumenSemanal} />
+        <VolumenChart data={volumenSemanal} unidadPeso={unidadPeso} />
       </SectionCard>
 
       {/* Progreso de peso */}
       <SectionCard title="Progreso de peso">
-        <PesoChart ejercicios={ejercicios} />
+        <PesoChart ejercicios={ejercicios} unidadPeso={unidadPeso} />
       </SectionCard>
 
       {/* Intensidad + Frecuencia en grid */}

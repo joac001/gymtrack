@@ -23,9 +23,10 @@ export interface EjercicioData {
 
 interface Props {
   ejercicios: EjercicioData[];
+  unidadPeso?: "kg" | "lbs";
 }
 
-export default function PesoChart({ ejercicios }: Props) {
+export default function PesoChart({ ejercicios, unidadPeso = "kg" }: Props) {
   const [selectedId, setSelectedId] = useState(ejercicios[0]?.id ?? "");
 
   if (ejercicios.length === 0) {
@@ -93,7 +94,7 @@ export default function PesoChart({ ejercicios }: Props) {
           axisLeft={{
             tickSize: 0,
             tickPadding: 8,
-            format: (v) => `${v} kg`,
+            format: (v) => `${v} ${unidadPeso}`,
           }}
           gridYValues={4}
           useMesh
@@ -110,7 +111,7 @@ export default function PesoChart({ ejercicios }: Props) {
             >
               <strong>{String(point.data.x)}</strong>
               <br />
-              {String(point.data.y)} kg
+              {String(point.data.y)} {unidadPeso}
             </div>
           )}
         />
