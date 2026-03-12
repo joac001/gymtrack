@@ -30,3 +30,29 @@ export async function GET(_req: Request, { params }: Params) {
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
+
+// DELETE /api/logs/[id] — eliminar un entrenamiento
+export async function DELETE(_req: Request, { params }: Params) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  try {
+    await connectDB();
+    const log = await WorkoutLog.findOneAndDelete({
+      _id: id,
+      userId: session.user.id,
+    });
+
+    if (!log) {
+      return NextResponse.json({ error: "Registro no encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}

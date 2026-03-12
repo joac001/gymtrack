@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, ExternalLink } from "lucide-react";
 
 interface SetInput {
   reps: string;
@@ -54,6 +54,7 @@ interface UltimoLog {
 interface Props {
   sesion: SesionData;
   ultimosLogs?: UltimoLog[];
+  unidadPeso?: "kg" | "lbs";
 }
 
 const INTENSIDADES = [
@@ -83,7 +84,7 @@ function initEjercicios(sesion: SesionData): EjercicioInput[] {
   }));
 }
 
-export default function EntrenarForm({ sesion, ultimosLogs = [] }: Props) {
+export default function EntrenarForm({ sesion, ultimosLogs = [], unidadPeso = "kg" }: Props) {
   const router = useRouter();
   const color = sesion.color;
 
@@ -165,10 +166,12 @@ export default function EntrenarForm({ sesion, ultimosLogs = [] }: Props) {
         esExtra: e.esExtra,
         sets: e.sets
           .filter((s) => s.reps !== "" || s.peso !== "")
-          .map((s) => ({
-            reps: Number(s.reps) || 0,
-            peso: Number(s.peso) || 0,
-          })),
+          .map((s) => {
+            const pesoNum = Number(s.peso) || 0;
+            // Siempre guardar en kg en el backend
+            const pesoKg = unidadPeso === "lbs" ? pesoNum / 2.20462 : pesoNum;
+            return { reps: Number(s.reps) || 0, peso: Math.round(pesoKg * 100) / 100 };
+          }),
       }))
       .filter((e) => e.sets.length > 0);
 
@@ -310,16 +313,26 @@ export default function EntrenarForm({ sesion, ultimosLogs = [] }: Props) {
                 {ejIdx + 1}
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <span
-                  style={{
-                    fontWeight: "600",
-                    fontSize: "0.9rem",
-                    color: "var(--text)",
-                    display: "block",
-                  }}
-                >
-                  {ej.nombre}
-                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontWeight: "600",
+                      fontSize: "0.9rem",
+                      color: "var(--text)",
+                    }}
+                  >
+                    {ej.nombre}
+                  </span>
+                  <a
+                    href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(ej.nombre)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Ver imágenes del ejercicio"
+                    style={{ color: "var(--text-muted)", display: "flex", flexShrink: 0 }}
+                  >
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
                 {objetivo && (
                   <span
                     style={{
@@ -369,11 +382,14 @@ export default function EntrenarForm({ sesion, ultimosLogs = [] }: Props) {
                 >
                   Última vez:{" "}
                   {ultimoLog.sets
-                    .map((s) =>
-                      ej.tipoMedida === "tiempo"
-                        ? `${s.reps} min`
-                        : `${s.reps} × ${s.peso} kg`,
-                    )
+                    .map((s) => {
+                      if (ej.tipoMedida === "tiempo") return `${s.reps} min`;
+                      const pesoDisplay =
+                        unidadPeso === "lbs"
+                          ? Math.round(s.peso * 2.20462 * 10) / 10
+                          : s.peso;
+                      return `${s.reps} × ${pesoDisplay} ${unidadPeso}`;
+                    })
                     .join(" | ")}
                 </p>
               )}
@@ -407,7 +423,7 @@ export default function EntrenarForm({ sesion, ultimosLogs = [] }: Props) {
                       textAlign: "center",
                     }}
                   >
-                    KG
+                    {unidadPeso.toUpperCase()}
                   </span>
                 )}
               </div>

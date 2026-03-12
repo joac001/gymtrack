@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import Routine from "@/models/Routine";
+import WorkoutLog from "@/models/WorkoutLog";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -64,7 +65,12 @@ export async function DELETE(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Rutina no encontrada" }, { status: 404 });
     }
 
-    return NextResponse.json({ ok: true });
+    const logsConservados = await WorkoutLog.countDocuments({
+      userId: session.user.id,
+      rutinaId: id,
+    });
+
+    return NextResponse.json({ ok: true, logsConservados });
   } catch {
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }

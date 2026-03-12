@@ -10,12 +10,14 @@ interface Props {
 export default function UploadStep({ onFile, loading }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [errorFormato, setErrorFormato] = useState(false);
 
   function handleFile(file: File) {
     if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
-      alert("Solo se aceptan archivos .xlsx o .xls");
+      setErrorFormato(true);
       return;
     }
+    setErrorFormato(false);
     onFile(file);
   }
 
@@ -76,6 +78,12 @@ export default function UploadStep({ onFile, loading }: Props) {
           if (file) handleFile(file);
         }}
       />
+
+      {errorFormato && (
+        <p className="text-[0.85rem] text-center m-0" style={{ color: "#ef4444" }}>
+          Solo se aceptan archivos .xlsx o .xls
+        </p>
+      )}
 
       {/* Info */}
       <div

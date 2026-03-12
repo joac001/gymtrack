@@ -3,18 +3,26 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import WorkoutLog from "@/models/WorkoutLog";
+import User from "@/models/User";
 import LogHeader from "@/components/historial/LogHeader";
 import EjercicioCard from "@/components/historial/EjercicioCard";
+import DeleteLogButton from "@/components/historial/DeleteLogButton";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function DetalleLogPage({ params }: Props) {
   const { id } = await params;
   const session = await auth();
+  const userId = session!.user.id;
 
   await connectDB();
-  const log = await WorkoutLog.findOne({ _id: id, userId: session!.user.id }).lean();
+  const [log, userDoc] = await Promise.all([
+    WorkoutLog.findOne({ _id: id, userId }).lean(),
+    User.findById(userId).lean(),
+  ]);
   if (!log) notFound();
+
+  const unidadPeso = ((userDoc as { unidadPeso?: string } | null)?.unidadPeso ?? "kg") as "kg" | "lbs";
 
   const volumenTotal = log.ejercicios.reduce(
     (total, e) => total + e.sets.reduce((s, set) => s + set.reps * set.peso, 0),
@@ -23,17 +31,21 @@ export default async function DetalleLogPage({ params }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Back */}
-      <Link
-        href="/historial"
-        className="text-[0.85rem] no-underline"
-        style={{ color: "var(--text-muted)" }}
-      >
-        ← Historial
-      </Link>
+      {/* Back + delete */}
+      <div className="flex items-center justify-between">
+        <Link
+          href="/historial"
+          className="text-[0.85rem] no-underline"
+          style={{ color: "var(--text-muted)" }}
+        >
+          ← Historial
+        </Link>
+        <DeleteLogButton logId={id} />
+      </div>
 
       {/* Header */}
       <LogHeader
+        unidadPeso={unidadPeso}
         log={{
           sesionNombre: log.sesionNombre,
           sesionColor: log.sesionColor,
@@ -52,6 +64,7 @@ export default async function DetalleLogPage({ params }: Props) {
             key={i}
             index={i}
             sesionColor={log.sesionColor}
+            unidadPeso={unidadPeso}
             ejercicio={{
               nombre: ej.nombre,
               esExtra: ej.esExtra,

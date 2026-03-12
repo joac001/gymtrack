@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Trash2, GripVertical } from "lucide-react";
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -213,93 +215,83 @@ function SortableEjercicio({
         )}
       </div>
 
-      {/* Tipo medida + campos */}
-      <div style={{ display: "flex", gap: "8px" }}>
-        <div style={{ flexShrink: 0 }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: "0.75rem",
-              color: "var(--text-muted)",
-              marginBottom: "4px",
-            }}
-          >
-            Medida
-          </label>
-          <select
-            value={ej.tipoMedida}
-            onChange={(e) => onUpdate("tipoMedida", e.target.value)}
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)",
-              color: "var(--text)",
-              fontSize: "0.85rem",
-              padding: "8px 10px",
-              fontFamily: "inherit",
-              cursor: "pointer",
-              height: "38px",
-            }}
-          >
-            <option value="reps">Reps</option>
-            <option value="tiempo">Minutos</option>
-          </select>
+      {/* Tipo medida + campos — 2 filas para que no se achiquen en mobile */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {/* Fila 1: Medida + Series */}
+        <div style={{ display: "flex", gap: "8px" }}>
+          <div style={{ flex: 1 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.8rem",
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                fontWeight: "500",
+                marginBottom: "6px",
+              }}
+            >
+              Medida
+            </label>
+            <select
+              value={ej.tipoMedida}
+              onChange={(e) => onUpdate("tipoMedida", e.target.value)}
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-md)",
+                color: "var(--text)",
+                fontSize: "1rem",
+                padding: "12px 14px",
+                fontFamily: "inherit",
+                cursor: "pointer",
+                width: "100%",
+              }}
+            >
+              <option value="reps">Reps</option>
+              <option value="tiempo">Minutos</option>
+            </select>
+          </div>
+          <div style={{ flex: 1 }}>
+            <Input
+              label={ej.tipoMedida === "reps" ? "Series" : "Series (opcional)"}
+              inputMode="numeric"
+              placeholder="3"
+              value={ej.series || ""}
+              onChange={(e) => onUpdate("series", Number(e.target.value) || 1)}
+            />
+          </div>
         </div>
 
+        {/* Fila 2: campos numéricos según tipo */}
         {ej.tipoMedida === "reps" ? (
-          <>
-            <div style={{ flex: 1 }}>
-              <Input
-                label="Series"
-                type="number"
-                min={1}
-                value={ej.series}
-                onChange={(e) => onUpdate("series", Number(e.target.value))}
-              />
-            </div>
+          <div style={{ display: "flex", gap: "8px" }}>
             <div style={{ flex: 1 }}>
               <Input
                 label="Reps"
-                type="number"
-                min={1}
-                value={ej.repsDesde}
+                inputMode="numeric"
+                placeholder="10"
+                value={ej.repsDesde || ""}
                 onChange={(e) => onUpdate("repsDesde", Number(e.target.value))}
               />
             </div>
             <div style={{ flex: 1 }}>
               <Input
                 label="Hasta (opcional)"
-                type="number"
-                min={1}
+                inputMode="numeric"
                 placeholder="—"
                 value={ej.repsHasta}
                 onChange={(e) => onUpdate("repsHasta", e.target.value)}
               />
             </div>
-          </>
+          </div>
         ) : (
-          <>
-            <div style={{ flex: 1 }}>
-              <Input
-                label="Series (opcional)"
-                type="number"
-                min={1}
-                placeholder="1"
-                value={ej.series > 1 ? ej.series : "1"}
-                onChange={(e) =>
-                  onUpdate("series", Number(e.target.value) || 1)
-                }
-              />
-            </div>
-            <div style={{ flex: 2 }}>
-              <Input
-                label="Duración"
-                placeholder="ej: 10 min"
-                value={ej.duracion}
-                onChange={(e) => onUpdate("duracion", e.target.value)}
-              />
-            </div>
-          </>
+          <Input
+            label="Duración"
+            placeholder="ej: 10 min"
+            value={ej.duracion}
+            onChange={(e) => onUpdate("duracion", e.target.value)}
+          />
         )}
       </div>
 
@@ -314,6 +306,10 @@ function SortableEjercicio({
 
 // --- Main form ---
 
+type PendingDelete =
+  | { tipo: "sesion"; sesionId: string; nombre: string }
+  | { tipo: "ejercicio"; sesionId: string; ejId: string; nombre: string };
+
 export default function RutinaForm({ rutinaId, initialData }: Props) {
   const router = useRouter();
   const [nombre, setNombre] = useState(initialData?.nombre ?? "");
@@ -322,9 +318,36 @@ export default function RutinaForm({ rutinaId, initialData }: Props) {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    if (rutinaId) {
+      if (pendingDelete.tipo === "sesion") {
+        await fetch(`/api/routines/${rutinaId}/sesiones/${pendingDelete.sesionId}`, {
+          method: "DELETE",
+        });
+        router.refresh();
+      } else {
+        await fetch(
+          `/api/routines/${rutinaId}/sesiones/${pendingDelete.sesionId}/ejercicios/${pendingDelete.ejId}`,
+          { method: "DELETE" },
+        );
+        router.refresh();
+      }
+    } else {
+      if (pendingDelete.tipo === "sesion") {
+        removeSesion(pendingDelete.sesionId);
+      } else {
+        removeEjercicio(pendingDelete.sesionId, pendingDelete.ejId);
+      }
+    }
+    setPendingDelete(null);
+  }
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
   );
 
   function addSesion() {
@@ -462,6 +485,7 @@ export default function RutinaForm({ rutinaId, initialData }: Props) {
   }
 
   return (
+    <>
     <form
       onSubmit={handleSubmit}
       style={{ display: "flex", flexDirection: "column", gap: "24px" }}
@@ -537,7 +561,13 @@ export default function RutinaForm({ rutinaId, initialData }: Props) {
                   {sesiones.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeSesion(sesion.id)}
+                      onClick={() =>
+                        setPendingDelete({
+                          tipo: "sesion",
+                          sesionId: sesion.id,
+                          nombre: sesion.nombre || "esta sesión",
+                        })
+                      }
                       style={btnIconStyle}
                     >
                       <Trash2 size={13} />
@@ -676,7 +706,14 @@ export default function RutinaForm({ rutinaId, initialData }: Props) {
                         onUpdate={(field, value) =>
                           updateEjercicio(sesion.id, ej.id, field, value)
                         }
-                        onRemove={() => removeEjercicio(sesion.id, ej.id)}
+                        onRemove={() =>
+                          setPendingDelete({
+                            tipo: "ejercicio",
+                            sesionId: sesion.id,
+                            ejId: ej.id,
+                            nombre: ej.nombre || "este ejercicio",
+                          })
+                        }
                       />
                     ))}
                   </SortableContext>
@@ -737,6 +774,26 @@ export default function RutinaForm({ rutinaId, initialData }: Props) {
         {rutinaId ? "Guardar cambios" : "Crear rutina"}
       </Button>
     </form>
+
+    {pendingDelete && (
+      <ConfirmDialog
+        title={
+          pendingDelete.tipo === "sesion"
+            ? `¿Eliminar la sesión «${pendingDelete.nombre}»?`
+            : `¿Eliminar «${pendingDelete.nombre}»?`
+        }
+        description={
+          pendingDelete.tipo === "sesion"
+            ? "Los entrenamientos que hayas registrado en esta sesión se conservarán en tu historial."
+            : "Los registros históricos de este ejercicio se conservan."
+        }
+        danger
+        confirmLabel="Eliminar"
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
+    )}
+  </>
   );
 }
 

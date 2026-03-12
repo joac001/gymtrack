@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import RutinaCard, { RutinaData } from "./RutinaCard";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface Props {
   rutinas: RutinaData[];
@@ -11,6 +12,7 @@ interface Props {
 export default function RutinasLista({ rutinas: inicial }: Props) {
   const router = useRouter();
   const [rutinas, setRutinas] = useState<RutinaData[]>(inicial);
+  const [pendingEliminar, setPendingEliminar] = useState<{ id: string; nombre: string } | null>(null);
 
   async function handleActivar(id: string) {
     const res = await fetch(`/api/routines/${id}`, {
@@ -25,13 +27,14 @@ export default function RutinasLista({ rutinas: inicial }: Props) {
     }
   }
 
-  async function handleEliminar(id: string) {
-    if (!confirm("¿Eliminar esta rutina?")) return;
-    const res = await fetch(`/api/routines/${id}`, { method: "DELETE" });
+  async function confirmarEliminar() {
+    if (!pendingEliminar) return;
+    const res = await fetch(`/api/routines/${pendingEliminar.id}`, { method: "DELETE" });
     if (res.ok) {
-      setRutinas((prev) => prev.filter((r) => r._id !== id));
+      setRutinas((prev) => prev.filter((r) => r._id !== pendingEliminar.id));
       router.refresh();
     }
+    setPendingEliminar(null);
   }
 
   if (rutinas.length === 0) {
@@ -48,15 +51,28 @@ export default function RutinasLista({ rutinas: inicial }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {rutinas.map((rutina) => (
-        <RutinaCard
-          key={rutina._id}
-          rutina={rutina}
-          onActivar={handleActivar}
-          onEliminar={handleEliminar}
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {rutinas.map((rutina) => (
+          <RutinaCard
+            key={rutina._id}
+            rutina={rutina}
+            onActivar={handleActivar}
+            onEliminar={(id) => setPendingEliminar({ id, nombre: rutina.nombre })}
+          />
+        ))}
+      </div>
+
+      {pendingEliminar && (
+        <ConfirmDialog
+          title={`¿Eliminar «${pendingEliminar.nombre}»?`}
+          description="Los entrenamientos que hayas registrado se conservarán en tu historial."
+          danger
+          confirmLabel="Eliminar"
+          onConfirm={confirmarEliminar}
+          onCancel={() => setPendingEliminar(null)}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }
