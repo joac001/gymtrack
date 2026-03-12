@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  /* Colores base */
+  --background: #0e0e0f;
+  --surface: #161617;
+  --border: #252527;
+
+  /* Texto */
+  --text: #e8e8e8;
+  --text-muted: #6b6b72;
+
+  /* Acento principal */
+  --push: #f4634a;
+  --push-bg: rgba(244, 99, 74, 0.08);
+
+  /* Acento Pull (azul) */
+  --pull: #3b82f6;
+  --pull-bg: rgba(59, 130, 246, 0.08);
+
+  /* Acento Legs (verde) */
+  --legs: #22c55e;
+  --legs-bg: rgba(34, 197, 94, 0.08);
+
+  /* Colores de sesión (paleta para rutinas) */
+  --session-push: #f97316;
+  --session-pull: #3b82f6;
+  --session-legs: #22c55e;
+  --session-violet: #a855f7;
+  --session-pink: #ec4899;
+  --session-teal: #14b8a6;
+  --session-amber: #f59e0b;
+  --session-red: #ef4444;
+
+  /* Estados */
+  --success: #22c55e;
+  --success-bg: rgba(34, 197, 94, 0.08);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.08);
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.08);
+  --danger-border: rgba(239, 68, 68, 0.3);
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-push: var(--push);
+  --color-pull: var(--pull);
+  --color-legs: var(--legs);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --font-display: var(--font-bebas);
+  --font-sans: var(--font-dm-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
