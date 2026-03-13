@@ -21,52 +21,65 @@ export default function IntensidadChart({ data }: Props) {
     );
   }
 
+  // Mostrar solo ~5 ticks en el eje X para evitar solapamiento en mobile
+  const step = Math.max(1, Math.ceil(data.length / 5));
+  const tickValues = data.filter((_, i) => i % step === 0).map((d) => d.x);
+
+  const lastPoint = data[data.length - 1];
+
   return (
-    <div style={{ height: 180 }}>
-      <ResponsiveLine
-        data={[{ id: "intensidad", data }]}
-        margin={{ top: 10, right: 20, bottom: 40, left: 40 }}
-        xScale={{ type: "point" }}
-        yScale={{ type: "linear", min: 1, max: 10, nice: false }}
-        curve="monotoneX"
-        colors={["#f4634a"]}
-        lineWidth={2}
-        pointSize={5}
-        pointColor="#f4634a"
-        pointBorderWidth={2}
-        pointBorderColor="#0e0e0f"
-        enableArea
-        areaOpacity={0.08}
-        theme={nivoTheme}
-        axisBottom={{
-          tickSize: 0,
-          tickPadding: 8,
-          tickRotation: -35,
-        }}
-        axisLeft={{
-          tickSize: 0,
-          tickPadding: 8,
-          tickValues: [2, 4, 6, 8, 10],
-        }}
-        gridYValues={[2, 4, 6, 8, 10]}
-        useMesh
-        tooltip={({ point }) => (
-          <div
-            style={{
-              background: "#161617",
-              border: "1px solid #252527",
-              borderRadius: "8px",
-              padding: "6px 10px",
-              fontSize: "12px",
-              color: "#e8e8e8",
-            }}
-          >
-            <strong>{String(point.data.x)}</strong>
-            <br />
-            Intensidad {String(point.data.y)}/10
-          </div>
-        )}
-      />
+    <div className="flex flex-col gap-1">
+      <div style={{ height: 180 }}>
+        <ResponsiveLine
+          data={[{ id: "intensidad", data }]}
+          margin={{ top: 10, right: 20, bottom: 40, left: 40 }}
+          xScale={{ type: "point" }}
+          yScale={{ type: "linear", min: 1, max: 10, nice: false }}
+          curve="monotoneX"
+          colors={["#f4634a"]}
+          lineWidth={2}
+          pointSize={5}
+          pointColor="#f4634a"
+          pointBorderWidth={2}
+          pointBorderColor="#0e0e0f"
+          enableArea
+          areaOpacity={0.08}
+          theme={nivoTheme}
+          axisBottom={{
+            tickSize: 0,
+            tickPadding: 8,
+            tickRotation: -35,
+            tickValues,
+          }}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 8,
+            tickValues: [2, 4, 6, 8, 10],
+            format: (v) => (v === 10 ? "10/10" : String(v)),
+          }}
+          gridYValues={[2, 4, 6, 8, 10]}
+          useMesh
+          tooltip={({ point }) => (
+            <div
+              style={{
+                background: "#161617",
+                border: "1px solid #252527",
+                borderRadius: "8px",
+                padding: "6px 10px",
+                fontSize: "12px",
+                color: "#e8e8e8",
+              }}
+            >
+              <strong>{String(point.data.x)}</strong>
+              <br />
+              Intensidad {String(point.data.y)}/10
+            </div>
+          )}
+        />
+      </div>
+      <p className="text-[0.72rem] text-right" style={{ color: "var(--text-muted)" }}>
+        Último: <strong style={{ color: "var(--text)" }}>{lastPoint.y}/10</strong> — {lastPoint.x}
+      </p>
     </div>
   );
 }

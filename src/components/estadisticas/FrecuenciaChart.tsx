@@ -29,7 +29,7 @@ export default function FrecuenciaChart({ data }: Props) {
         keys={["cantidad"]}
         indexBy="sesion"
         layout="horizontal"
-        margin={{ top: 0, right: 40, bottom: 10, left: 100 }}
+        margin={{ top: 0, right: 56, bottom: 10, left: 100 }}
         padding={0.35}
         colors={({ data }) => String((data as unknown as SesionFrecuencia).color)}
         borderRadius={3}
@@ -41,8 +41,8 @@ export default function FrecuenciaChart({ data }: Props) {
         axisBottom={null}
         gridXValues={[]}
         enableLabel
-        label={({ value }) => `${value}x`}
-        labelSkipWidth={20}
+        label={({ value }) => `${value} veces`}
+        labelSkipWidth={40}
         labelTextColor="#e8e8e8"
         tooltip={({ value, indexValue }) => (
           <div

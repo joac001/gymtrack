@@ -12,6 +12,7 @@ const ResponsiveLine = dynamic(
 interface DataPoint {
   x: string;
   y: number;
+  semanaLabel?: string;
 }
 
 export interface EjercicioData {
@@ -46,6 +47,22 @@ export default function PesoChart({ ejercicios, unidadPeso = "kg" }: Props) {
       data: ejercicio.datos,
     },
   ];
+
+  // Mostrar ~5 ticks en eje X para evitar solapamiento en mobile
+  const step = Math.max(1, Math.ceil(ejercicio.datos.length / 5));
+  const tickValues = ejercicio.datos.filter((_, i) => i % step === 0).map((d) => d.x);
+
+  // Ticks del eje Y cada 2 unidades
+  const yVals = ejercicio.datos.map((d) => d.y);
+  const minY = Math.min(...yVals);
+  const maxY = Math.max(...yVals);
+  const yStep = 2;
+  const yTickStart = Math.floor(minY / yStep) * yStep;
+  const yTickEnd   = Math.ceil(maxY / yStep) * yStep;
+  const yTickValues: number[] = [];
+  for (let v = yTickStart; v <= yTickEnd; v += yStep) yTickValues.push(v);
+
+  const lastDato = ejercicio.datos[ejercicio.datos.length - 1];
 
   return (
     <div className="flex flex-col gap-3">
@@ -90,13 +107,15 @@ export default function PesoChart({ ejercicios, unidadPeso = "kg" }: Props) {
             tickSize: 0,
             tickPadding: 8,
             tickRotation: -35,
+            tickValues,
           }}
           axisLeft={{
             tickSize: 0,
             tickPadding: 8,
+            tickValues: yTickValues,
             format: (v) => `${v} ${unidadPeso}`,
           }}
-          gridYValues={4}
+          gridYValues={yTickValues}
           useMesh
           tooltip={({ point }) => (
             <div
@@ -116,6 +135,11 @@ export default function PesoChart({ ejercicios, unidadPeso = "kg" }: Props) {
           )}
         />
       </div>
+
+      {/* Último valor — siempre visible en mobile */}
+      <p className="text-[0.72rem] text-right" style={{ color: "var(--text-muted)" }}>
+        Último: <strong style={{ color: "var(--text)" }}>{lastDato.y} {unidadPeso}</strong> — {lastDato.x}
+      </p>
     </div>
   );
 }

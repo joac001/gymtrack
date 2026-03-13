@@ -9,18 +9,18 @@ const ResponsiveBar = dynamic(
 );
 
 interface Props {
-  data: { semana: string; volumen: number }[];
+  data: { semana: string; semanaLabel?: string; volumen: number }[];
   unidadPeso?: "kg" | "lbs";
 }
 
 export default function VolumenChart({ data, unidadPeso = "kg" }: Props) {
   return (
-    <div style={{ height: 200 }}>
+    <div style={{ height: 220 }}>
       <ResponsiveBar
         data={data}
         keys={["volumen"]}
         indexBy="semana"
-        margin={{ top: 10, right: 10, bottom: 40, left: 60 }}
+        margin={{ top: 20, right: 10, bottom: 50, left: 52 }}
         padding={0.35}
         colors={["#f4634a"]}
         borderRadius={3}
@@ -28,16 +28,23 @@ export default function VolumenChart({ data, unidadPeso = "kg" }: Props) {
         axisBottom={{
           tickSize: 0,
           tickPadding: 8,
-          tickRotation: -35,
+          tickRotation: -45,
         }}
         axisLeft={{
           tickSize: 0,
           tickPadding: 8,
-          format: (v) => `${(v / 1000).toFixed(0)}k`,
+          format: (v) => (v === 0 ? "" : `${(v / 1000).toFixed(0)}k`),
         }}
         gridYValues={4}
-        enableLabel={false}
-        tooltip={({ value, indexValue }) => (
+        enableLabel
+        label={({ value }) =>
+          value != null && value >= 5000
+            ? `${Math.round((value as number) / 1000)}k`
+            : ""
+        }
+        labelSkipHeight={24}
+        labelTextColor="#e8e8e8"
+        tooltip={({ value, indexValue, data }) => (
           <div
             style={{
               background: "#161617",
@@ -48,9 +55,9 @@ export default function VolumenChart({ data, unidadPeso = "kg" }: Props) {
               color: "#e8e8e8",
             }}
           >
-            <strong>{indexValue}</strong>
+            <strong>{(data as { semanaLabel?: string }).semanaLabel ?? indexValue}</strong>
             <br />
-            {value.toLocaleString("es-AR")} {unidadPeso} vol
+            {value.toLocaleString("es-AR")} {unidadPeso} de volumen
           </div>
         )}
       />
