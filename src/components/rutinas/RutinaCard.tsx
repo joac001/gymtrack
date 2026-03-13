@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ISesion } from "@/models/Routine";
 import { Trash2 } from "lucide-react";
 
@@ -18,21 +21,25 @@ const DIAS_LABEL: Record<string, string> = {
 interface Props {
   rutina: RutinaData;
   onActivar: (id: string) => void;
+  onDesactivar: (id: string) => void;
   onEliminar: (id: string) => void;
 }
 
-export default function RutinaCard({ rutina, onActivar, onEliminar }: Props) {
+export default function RutinaCard({ rutina, onActivar, onDesactivar, onEliminar }: Props) {
+  const router = useRouter();
   const sesionesOrdenadas = [...rutina.sesiones].sort(
     (a, b) => DIAS_ORDEN.indexOf(a.dia) - DIAS_ORDEN.indexOf(b.dia)
   );
 
   return (
     <div
+      onClick={() => router.push(`/rutinas/${rutina._id}`)}
       className="flex flex-col gap-3 p-4"
       style={{
         background: "var(--surface)",
         border: `1px solid ${rutina.activa ? "var(--push)" : "var(--border)"}`,
         borderRadius: "var(--radius-lg)",
+        cursor: "pointer",
       }}
     >
       {/* Header */}
@@ -75,19 +82,7 @@ export default function RutinaCard({ rutina, onActivar, onEliminar }: Props) {
       )}
 
       {/* Acciones */}
-      <div className="flex gap-2 mt-1">
-        <Link
-          href={`/rutinas/${rutina._id}`}
-          className="flex-1 text-center p-2 text-sm font-medium no-underline"
-          style={{
-            background: "transparent",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-md)",
-            color: "var(--text)",
-          }}
-        >
-          Ver
-        </Link>
+      <div className="flex gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
         <Link
           href={`/rutinas/${rutina._id}/editar`}
           className="flex-1 text-center p-2 text-sm font-medium no-underline"
@@ -97,10 +92,24 @@ export default function RutinaCard({ rutina, onActivar, onEliminar }: Props) {
             borderRadius: "var(--radius-md)",
             color: "var(--text)",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
           Editar
         </Link>
-        {!rutina.activa && (
+        {rutina.activa ? (
+          <button
+            onClick={() => onDesactivar(rutina._id)}
+            className="flex-1 p-2 text-sm font-medium cursor-pointer"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-md)",
+              color: "var(--text-muted)",
+            }}
+          >
+            Desactivar
+          </button>
+        ) : (
           <button
             onClick={() => onActivar(rutina._id)}
             className="flex-1 p-2 text-sm font-medium cursor-pointer"

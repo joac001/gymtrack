@@ -15,6 +15,64 @@ interface Props {
   unidadPeso?: "kg" | "lbs";
 }
 
+function getISOWeek(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
+function agruparPorMesYSemana(logs: (LogCardData & { rutinaId: string })[]) {
+  // Ordenar más reciente primero
+  const sorted = [...logs].sort(
+    (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+  );
+
+  type SemanaGroup = { semana: number; logs: (LogCardData & { rutinaId: string })[] };
+  type MesGroup = {
+    key: string;
+    label: string;
+    semanas: SemanaGroup[];
+  };
+
+  const meses: MesGroup[] = [];
+  const mesMap = new Map<string, MesGroup>();
+
+  for (const log of sorted) {
+    const fecha = new Date(log.fecha);
+    const year = fecha.getFullYear();
+    const month = fecha.getMonth();
+    const semana = getISOWeek(fecha);
+    const mesKey = `${year}-${month}`;
+
+    if (!mesMap.has(mesKey)) {
+      const label = fecha.toLocaleDateString("es-AR", {
+        month: "long",
+        year: "numeric",
+      });
+      const grupo: MesGroup = { key: mesKey, label, semanas: [] };
+      meses.push(grupo);
+      mesMap.set(mesKey, grupo);
+    }
+
+    const mes = mesMap.get(mesKey)!;
+    let semanaGroup = mes.semanas.find((s) => s.semana === semana);
+    if (!semanaGroup) {
+      semanaGroup = { semana, logs: [] };
+      mes.semanas.push(semanaGroup);
+    }
+    semanaGroup.logs.push(log);
+  }
+
+  // Ordenar semanas dentro de cada mes (más reciente primero)
+  for (const mes of meses) {
+    mes.semanas.sort((a, b) => b.semana - a.semana);
+  }
+
+  return meses;
+}
+
 export default function HistorialList({ logs, rutinas, unidadPeso = "kg" }: Props) {
   const [rutinaSeleccionada, setRutinaSeleccionada] = useState<string | null>(null);
 
@@ -46,6 +104,8 @@ export default function HistorialList({ logs, rutinas, unidadPeso = "kg" }: Prop
       </div>
     );
   }
+
+  const grupos = agruparPorMesYSemana(logsFiltrados);
 
   return (
     <div className="flex flex-col gap-4">
@@ -88,15 +148,57 @@ export default function HistorialList({ logs, rutinas, unidadPeso = "kg" }: Prop
         </div>
       )}
 
-      {/* Lista de logs */}
+      {/* Lista agrupada */}
       {logsFiltrados.length === 0 ? (
         <p className="text-[0.85rem]" style={{ color: "var(--text-muted)" }}>
           No hay entrenamientos para esta rutina.
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {logsFiltrados.map((log) => (
-            <LogCard key={log.id} unidadPeso={unidadPeso} log={log} />
+        <div className="flex flex-col gap-6">
+          {grupos.map((mes) => (
+            <div key={mes.key} className="flex flex-col gap-3">
+              {/* Header de mes */}
+              <h2
+                className="m-0 text-sm font-semibold uppercase tracking-widest"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {mes.label}
+              </h2>
+
+              <div className="flex flex-col gap-4">
+                {mes.semanas.map((semana) => (
+                  <div key={semana.semana} className="flex flex-col gap-2">
+                    {/* Header de semana */}
+                    <div
+                      className="flex items-center gap-2"
+                    >
+                      <span
+                        className="text-xs font-semibold px-2 py-0.5"
+                        style={{
+                          background: "var(--surface)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "var(--radius-sm)",
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        Semana {semana.semana}
+                      </span>
+                      <span
+                        className="flex-1 h-px"
+                        style={{ background: "var(--border)" }}
+                      />
+                    </div>
+
+                    {/* Cards de la semana */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {semana.logs.map((log) => (
+                        <LogCard key={log.id} unidadPeso={unidadPeso} log={log} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}

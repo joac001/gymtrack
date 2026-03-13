@@ -27,6 +27,19 @@ export default function RutinasLista({ rutinas: inicial }: Props) {
     }
   }
 
+  async function handleDesactivar(id: string) {
+    const res = await fetch(`/api/routines/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ activa: false }),
+    });
+    if (res.ok) {
+      setRutinas((prev) =>
+        prev.map((r) => ({ ...r, activa: r._id === id ? false : r.activa }))
+      );
+    }
+  }
+
   async function confirmarEliminar() {
     if (!pendingEliminar) return;
     const res = await fetch(`/api/routines/${pendingEliminar.id}`, { method: "DELETE" });
@@ -58,6 +71,7 @@ export default function RutinasLista({ rutinas: inicial }: Props) {
             key={rutina._id}
             rutina={rutina}
             onActivar={handleActivar}
+            onDesactivar={handleDesactivar}
             onEliminar={(id) => setPendingEliminar({ id, nombre: rutina.nombre })}
           />
         ))}

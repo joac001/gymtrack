@@ -123,20 +123,16 @@ export default function SesionCard({ sesion }: Props) {
                   </span>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <a
-                      href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(ej.nombre)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <span
                       style={{
                         color: "var(--text)",
                         fontSize: "0.9rem",
                         fontWeight: "500",
-                        textDecoration: "none",
                         display: "block",
                       }}
                     >
                       {ej.nombre}
-                    </a>
+                    </span>
                     {ej.notas && (
                       <p style={{
                         color: "var(--text-muted)",

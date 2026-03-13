@@ -313,7 +313,7 @@ export default function EntrenarForm({ sesion, ultimosLogs = [], unidadPeso = "k
                 {ejIdx + 1}
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
                   <span
                     style={{
                       fontWeight: "600",
@@ -327,10 +327,18 @@ export default function EntrenarForm({ sesion, ultimosLogs = [], unidadPeso = "k
                     href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(ej.nombre)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Ver imágenes del ejercicio"
-                    style={{ color: "var(--text-muted)", display: "flex", flexShrink: 0 }}
+                    style={{
+                      color: "var(--text-muted)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      flexShrink: 0,
+                      fontSize: "0.75rem",
+                      textDecoration: "none",
+                    }}
                   >
-                    <ExternalLink size={13} />
+                    <ExternalLink size={12} />
+                    Ver imágenes
                   </a>
                 </div>
                 {objetivo && (

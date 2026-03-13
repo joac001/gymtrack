@@ -17,7 +17,14 @@
       "Bash(sed -i 's/- `P1` \\\\*\\\\*API `PATCH \\\\/api\\\\/user\\\\/settings`\\\\*\\\\* _\\(Sprint 2\\)_/- `P1` **Pantalla de configuración `\\\\/configuracion`** _\\(Sprint 2\\)_/' \"c:/Users/joaco/Desktop/Projects/gymtrack/.claude/BACKLOG.md\")",
       "Bash(grep -n \"API \\\\`PATCH\" \"c:/Users/joaco/Desktop/Projects/gymtrack/.claude/BACKLOG.md\")",
       "Bash(mkdir -p \"c:/Users/joaco/Desktop/Projects/gymtrack/src/app/api/routines/[id]/sesiones/[sesionId]\")",
-      "Bash(mkdir -p \"c:/Users/joaco/Desktop/Projects/gymtrack/src/app/api/routines/[id]/sesiones/[sesionId]/ejercicios/[ejId]\")"
+      "Bash(mkdir -p \"c:/Users/joaco/Desktop/Projects/gymtrack/src/app/api/routines/[id]/sesiones/[sesionId]/ejercicios/[ejId]\")",
+      "Bash(grep -n \"DELETE\\\\|delete\" src/app/api/routines/[id]/route.ts)",
+      "Bash(grep -n \"DELETE\\\\|delete\\\\|logsConservados\" src/app/api/routines/[id]/route.ts)",
+      "Bash(grep -n \"DELETE\" src/app/api/routines/[id]/sesiones/[sesionId]/route.ts)",
+      "Bash(grep -n \"DELETE\" src/app/api/routines/[id]/sesiones/[sesionId]/ejercicios/[ejId]/route.ts)",
+      "Bash(grep -n \"DELETE\" src/app/api/logs/[id]/route.ts)",
+      "Bash(cat src/app/\\\\\\(app\\\\\\)/estadisticas/page.tsx)",
+      "Bash(mongoexport --uri=\"mongodb+srv://joacoordo_gymtrack:pSeGNjUR8DycN1mO@gymtrack.7kiykqb.mongodb.net/gymtrack-dev\" --collection=ejerciciomusculos --out=\"c:/Users/joaco/Desktop/ejerciciomusculos.json\" --pretty)"
     ]
   }
 }

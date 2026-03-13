@@ -38,29 +38,23 @@ export default function RutinasPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1
-          className="text-[1.8rem] tracking-wider m-0"
-          style={{ fontFamily: "var(--font-bebas)", color: "var(--text)" }}
-        >
-          MIS RUTINAS
-        </h1>
-        <div className="flex items-center gap-2">
+      <div className="mb-6">
+        <div className="flex justify-end gap-2 mb-3">
           <Link
             href="/importar"
-            className="text-[0.9rem] font-semibold no-underline px-4 py-2"
+            className="text-[0.8rem] font-semibold no-underline px-3 py-1.5 flex items-center gap-1.5"
             style={{
               background: "#16a34a",
               color: "#fff",
               borderRadius: "var(--radius-md)",
             }}
           >
-            <Table size={15} strokeWidth={2.5} style={{ display: "inline", verticalAlign: "middle", marginRight: "5px", marginTop: "-2px" }} />
+            <Table size={13} strokeWidth={2.5} />
             Subir Excel
           </Link>
           <Link
             href="/rutinas/nueva"
-            className="text-[0.9rem] font-semibold no-underline px-4 py-2"
+            className="text-[0.8rem] font-semibold no-underline px-3 py-1.5"
             style={{
               background: "var(--push)",
               color: "#fff",
@@ -70,6 +64,12 @@ export default function RutinasPage() {
             + Nueva
           </Link>
         </div>
+        <h1
+          className="text-[1.8rem] tracking-wider m-0"
+          style={{ fontFamily: "var(--font-bebas)", color: "var(--text)" }}
+        >
+          MIS RUTINAS
+        </h1>
       </div>
 
       <Suspense fallback={<RutinasSkeleton />}>
