@@ -12,9 +12,9 @@ Para cada ejercicio se incluye un link a búsqueda de imágenes (Google Images) 
 - **Auth**: NextAuth.js v5 beta con MongoDB Adapter (Google OAuth)
 - **Deploy**: Vercel
 - **Drag & drop**: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`
-- **Gráficos**: `@nivo/line`, `@nivo/bar`, `@nivo/calendar`
+- **Gráficos**: `@nivo/line`, `@nivo/bar`, `@nivo/calendar`, `@nivo/radar`
 - **Íconos**: `lucide-react`
-- **IA (import)**: `@google/generative-ai` (Gemini 2.5 Flash Lite)
+- **IA (import + musculos)**: `@google/generative-ai` (Gemini 2.5 Flash Lite)
 - **Excel (import)**: `exceljs`
 
 ## Usuarios
@@ -33,12 +33,16 @@ Las rutinas son **editables**: cada usuario crea y gestiona sus propias rutinas 
    - Reps realizadas
    - Series completadas
    - Al finalizar el entrenamiento: **intensidad del 1 al 10** (esfuerzo percibido)
-3. **Estadísticas de progreso**:
+3. **Estadísticas de progreso** (ver sección Sprint 4 más abajo):
    - Progreso de peso por ejercicio (gráfico temporal)
-   - Racha y consistencia (semanas seguidas, días por mes)
-   - Volumen total por sesión (peso × reps × series)
+   - Racha y consistencia (semanas seguidas, heatmap por año)
+   - Volumen total por sesión (peso × reps × series), últimas 5 semanas
+   - Balance de volumen por sesión (Push/Pull/Legs)
+   - 1RM estimado por ejercicio (fórmula Epley), últimas 10 semanas
+   - Detección de plateau (ejercicios sin progreso en últimas 4 sesiones)
+   - Distribución muscular (radar polar, clasificación vía Gemini con caché)
 4. **Rutinas editables**: CRUD de sesiones y ejercicios
-5. **Links a imágenes**: Cada ejercicio linkea a búsqueda de Google Images _(pendiente de implementar)_
+5. **Links a imágenes**: En el formulario de entrenamiento cada ejercicio tiene un link a búsqueda de Google Images para consultar la técnica
 6. **Importar desde Excel**: el usuario sube un `.xlsx` con su rutina/historial preexistente. Gemini interpreta el contenido en una conversación de hasta 3 rondas de preguntas, luego muestra un resumen para confirmar antes de guardar. Crea las rutinas e importa los logs históricos.
 
 ## Design System
@@ -67,9 +71,11 @@ Las rutinas son **editables**: cada usuario crea y gestiona sus propias rutinas 
 
 > El detalle completo de cada modelo está en `src/models/CLAUDE.md`.
 
-**Routine** — múltiples por usuario, una `activa` a la vez. Sesiones embebidas con día de semana asignado. Ejercicios con `reps: { desde, hasta? }` (hasta opcional; si no está, es número fijo).
+**Routine** — múltiples por usuario, una `activa` a la vez. Sesiones embebidas con día de semana asignado. Ejercicios con `reps: { desde, hasta? }` (hasta opcional; si no está, es número fijo). Cada ejercicio tiene campo opcional `musculos: [{ nombre, porcentaje }]` para override manual de clasificación muscular.
 
 **WorkoutLog** — un documento por entrenamiento. Peso y reps por serie individual. Campos de sesión y nombre de ejercicio copiados (desnormalizados) para mantener el historial aunque la rutina cambie. Intensidad 1-10 al finalizar.
+
+**EjercicioMusculos** — caché global (compartida entre todos los usuarios) de clasificaciones musculares por ejercicio. `nombreNorm` como clave única (normalizado: lowercase, sin tildes, sin espacios). Generado por Gemini 2.5 Flash Lite vía `POST /api/ejercicios/musculos`.
 
 ## Gestión de tareas — Backlog
 
@@ -161,6 +167,33 @@ Toda pantalla se modulariza en componentes. No hay páginas monolíticas.
 - API routes en `app/api/`
 - Variables de entorno: `MONGODB_URI`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GEMINI_API_KEY`
 - En Next.js 16 el middleware se llama `proxy.ts` (no `middleware.ts`) y debe exportarse como `export const proxy = ...`
+
+---
+
+## Feature: Estadísticas avanzadas (Sprint 4)
+
+Ruta: `/estadisticas`. Server Component que calcula todos los datos y los pasa a `StatsPageClient`.
+
+**Sección "Free":**
+- `VolumenChart` — barras, últimas 5 semanas, labels S1–S5, tooltip muestra semana ISO real
+- `PesoChart` — línea por ejercicio, últimas N sesiones con ~5 ticks en X, eje Y cada 2 unidades
+- `IntensidadChart` — línea RPE por entrenamiento, eje Y "10/10", ~5 ticks en X
+- `FrecuenciaChart` — barras horizontales de sesiones entrenadas
+- `ConsistenciaChart` — heatmap por año (`@nivo/calendar`), solo muestra año actual, "Ver más" para anteriores. Usa `primerLunesDelAnio(year)` para evitar que nivo renderice semanas del año anterior.
+
+**Sección "Análisis avanzado":**
+- `BalanceChart` — barras horizontales de volumen acumulado por sesión, coloreadas por `sesionColor`
+- `UnRMChart` — línea de 1RM estimado por ejercicio (fórmula Epley: `peso × (1 + reps/30)`), últimas 10 semanas S1–S10
+- `PlateauList` — listado de ejercicios estancados (sin progreso en últimas 4 sesiones, ≥2 semanas)
+- `MusculoRadarChart` — radar polar de volumen por grupo muscular (`@nivo/radar`), con ranking top-5 abajo
+
+**Clasificación muscular:**
+- `src/lib/gemini-musculos.ts` — `normalizarNombre(nombre)` (lowercase + sin tildes + sin espacios) y `clasificarEjercicios(nombres[])` que llama a Gemini
+- `POST /api/ejercicios/musculos` — recibe lista de nombres, consulta caché en `EjercicioMusculos`, llama a Gemini solo para los que no están en caché, persiste y devuelve el mapa completo
+- La rutina del usuario puede tener `ejercicio.musculos[]` para override del clasificador global
+- Gemini devuelve JSON `{ "ejercicioNorm": [{ nombre, porcentaje }] }` usando exactamente estos 10 nombres: Pecho, Espalda, Hombros, Bíceps, Tríceps, Cuádriceps, Isquiotibiales, Glúteos, Abdominales, Pantorrillas
+
+---
 
 ## Loading states
 
