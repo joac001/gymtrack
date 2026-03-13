@@ -7,6 +7,11 @@ export interface IReps {
   hasta?: number;
 }
 
+export interface IMuscContribEj {
+  nombre: string;
+  porcentaje: number;
+}
+
 export interface IEjercicio {
   _id: mongoose.Types.ObjectId;
   nombre: string;
@@ -17,6 +22,7 @@ export interface IEjercicio {
   duracion?: string;
   notas?: string;
   orden: number;
+  musculos?: IMuscContribEj[];
 }
 
 export interface ISesion {
@@ -49,6 +55,14 @@ const RepsSchema = new Schema<IReps>(
   { _id: false }
 );
 
+const MuscContribEjSchema = new Schema<IMuscContribEj>(
+  {
+    nombre: { type: String, required: true },
+    porcentaje: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
 const EjercicioSchema = new Schema<IEjercicio>({
   nombre: { type: String, required: true },
   grupo: { type: String },
@@ -58,6 +72,7 @@ const EjercicioSchema = new Schema<IEjercicio>({
   duracion: { type: String },
   notas: { type: String },
   orden: { type: Number, required: true, default: 0 },
+  musculos: { type: [MuscContribEjSchema], default: undefined },
 });
 
 const SesionSchema = new Schema<ISesion>({

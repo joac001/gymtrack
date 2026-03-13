@@ -1,11 +1,34 @@
 "use client";
 
+import { useState } from "react";
+import { Copy, Check } from "lucide-react";
 import RachaCard from "./RachaCard";
 import ConsistenciaChart from "./ConsistenciaChart";
 import VolumenChart from "./VolumenChart";
 import PesoChart, { EjercicioData } from "./PesoChart";
 import IntensidadChart from "./IntensidadChart";
 import FrecuenciaChart, { SesionFrecuencia } from "./FrecuenciaChart";
+import BalanceChart from "./BalanceChart";
+import UnRMChart from "./UnRMChart";
+import PlateauList from "./PlateauList";
+import MusculoRadarChart from "./MusculoRadarChart";
+
+export interface BalanceSesion {
+  sesion: string;
+  color: string;
+  volumen: number;
+}
+
+export interface PlateauData {
+  ejercicio: string;
+  semanas: number;
+  ultimoPeso: number;
+}
+
+export interface MusculoData {
+  musculo: string;
+  volumen: number;
+}
 
 interface Props {
   rachaActual: number;
@@ -20,6 +43,10 @@ interface Props {
   intensidad: { x: string; y: number }[];
   frecuencia: SesionFrecuencia[];
   unidadPeso?: "kg" | "lbs";
+  balanceSesiones: BalanceSesion[];
+  unRmEjercicios: EjercicioData[];
+  plateaus: PlateauData[];
+  musculoData: MusculoData[];
 }
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -43,6 +70,49 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
+function ExportarDatosBtn(props: Omit<Props, "unidadPeso"> & { unidadPeso: "kg" | "lbs" }) {
+  const [copiado, setCopiado] = useState(false);
+
+  function copiar() {
+    const payload = {
+      unidadPeso: props.unidadPeso,
+      volumenSemanal: props.volumenSemanal,
+      progresoPeso: props.ejercicios.map((e) => ({
+        ejercicio: e.nombre,
+        datos: e.datos,
+      })),
+      balanceSesiones: props.balanceSesiones,
+      unRmEstimado: props.unRmEjercicios.map((e) => ({
+        ejercicio: e.nombre,
+        datos: e.datos,
+      })),
+      plateaus: props.plateaus,
+      distribucionMuscular: props.musculoData,
+    };
+    navigator.clipboard.writeText(JSON.stringify(payload, null, 2)).then(() => {
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    });
+  }
+
+  return (
+    <button
+      onClick={copiar}
+      className="flex items-center gap-2 text-[0.78rem] px-3 py-1.5 mx-auto cursor-pointer"
+      style={{
+        background: "transparent",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+        color: copiado ? "#22c55e" : "var(--text-muted)",
+        transition: "color 0.2s",
+      }}
+    >
+      {copiado ? <Check size={13} /> : <Copy size={13} />}
+      {copiado ? "Copiado" : "Exportar datos de gráficos"}
+    </button>
+  );
+}
+
 export default function StatsPageClient({
   rachaActual,
   rachaMaxima,
@@ -56,6 +126,10 @@ export default function StatsPageClient({
   intensidad,
   frecuencia,
   unidadPeso = "kg",
+  balanceSesiones,
+  unRmEjercicios,
+  plateaus,
+  musculoData,
 }: Props) {
   return (
     <div className="flex flex-col gap-4">
@@ -96,6 +170,66 @@ export default function StatsPageClient({
           <FrecuenciaChart data={frecuencia} />
         </SectionCard>
       </div>
+
+      {/* ── Separador de estadísticas avanzadas ─────────────────────────── */}
+      <div className="flex items-center gap-3 pt-2">
+        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+        <span
+          className="text-[0.7rem] font-semibold tracking-widest uppercase px-2 py-0.5"
+          style={{
+            color: "var(--text-muted)",
+            border: "1px solid var(--border)",
+            borderRadius: "999px",
+          }}
+        >
+          Análisis avanzado
+        </span>
+        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+      </div>
+
+      {/* Balance por sesión */}
+      <SectionCard title="Balance de volumen por sesión">
+        <BalanceChart data={balanceSesiones} unidadPeso={unidadPeso} />
+      </SectionCard>
+
+      {/* 1RM estimado */}
+      <SectionCard title="1RM estimado">
+        <UnRMChart ejercicios={unRmEjercicios} unidadPeso={unidadPeso} />
+      </SectionCard>
+
+      {/* Plateau */}
+      {plateaus.length > 0 && (
+        <SectionCard title="Ejercicios estancados">
+          <PlateauList plateaus={plateaus} unidadPeso={unidadPeso} />
+        </SectionCard>
+      )}
+
+      {/* Distribución muscular */}
+      {musculoData.length >= 3 && (
+        <SectionCard title="Distribución muscular">
+          <MusculoRadarChart data={musculoData} unidadPeso={unidadPeso} />
+        </SectionCard>
+      )}
+
+      {/* Botón de debug */}
+      <ExportarDatosBtn
+        rachaActual={rachaActual}
+        rachaMaxima={rachaMaxima}
+        totalEntrenamientos={totalEntrenamientos}
+        totalSemanas={totalSemanas}
+        consistencia={consistencia}
+        consistenciaDesde={consistenciaDesde}
+        consistenciaHasta={consistenciaHasta}
+        volumenSemanal={volumenSemanal}
+        ejercicios={ejercicios}
+        intensidad={intensidad}
+        frecuencia={frecuencia}
+        unidadPeso={unidadPeso}
+        balanceSesiones={balanceSesiones}
+        unRmEjercicios={unRmEjercicios}
+        plateaus={plateaus}
+        musculoData={musculoData}
+      />
     </div>
   );
 }
