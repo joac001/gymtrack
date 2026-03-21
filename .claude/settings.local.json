@@ -23,8 +23,7 @@
       "Bash(grep -n \"DELETE\" src/app/api/routines/[id]/sesiones/[sesionId]/route.ts)",
       "Bash(grep -n \"DELETE\" src/app/api/routines/[id]/sesiones/[sesionId]/ejercicios/[ejId]/route.ts)",
       "Bash(grep -n \"DELETE\" src/app/api/logs/[id]/route.ts)",
-      "Bash(cat src/app/\\\\\\(app\\\\\\)/estadisticas/page.tsx)",
-      "Bash(mongoexport --uri=\"mongodb+srv://joacoordo_gymtrack:pSeGNjUR8DycN1mO@gymtrack.7kiykqb.mongodb.net/gymtrack-dev\" --collection=ejerciciomusculos --out=\"c:/Users/joaco/Desktop/ejerciciomusculos.json\" --pretty)"
+      "Bash(cat src/app/\\\\\\(app\\\\\\)/estadisticas/page.tsx)"
     ]
   }
 }
