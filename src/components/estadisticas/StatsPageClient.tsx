@@ -12,6 +12,7 @@ import BalanceChart from "./BalanceChart";
 import UnRMChart from "./UnRMChart";
 import PlateauList from "./PlateauList";
 import MusculoRadarChart from "./MusculoRadarChart";
+import ProPaywall from "@/components/ui/ProPaywall";
 
 export interface BalanceSesion {
   sesion: string;
@@ -43,6 +44,7 @@ interface Props {
   intensidad: { x: string; y: number }[];
   frecuencia: SesionFrecuencia[];
   unidadPeso?: "kg" | "lbs";
+  plan?: "free" | "pro";
   balanceSesiones: BalanceSesion[];
   unRmEjercicios: EjercicioData[];
   plateaus: PlateauData[];
@@ -126,6 +128,7 @@ export default function StatsPageClient({
   intensidad,
   frecuencia,
   unidadPeso = "kg",
+  plan = "free",
   balanceSesiones,
   unRmEjercicios,
   plateaus,
@@ -188,27 +191,59 @@ export default function StatsPageClient({
       </div>
 
       {/* Balance por sesión */}
-      <SectionCard title="Balance de volumen por sesión">
-        <BalanceChart data={balanceSesiones} unidadPeso={unidadPeso} />
-      </SectionCard>
+      {plan === "pro" ? (
+        <SectionCard title="Balance de volumen por sesión">
+          <BalanceChart data={balanceSesiones} unidadPeso={unidadPeso} />
+        </SectionCard>
+      ) : (
+        <ProPaywall title="Balance de volumen">
+          <SectionCard title="Balance de volumen por sesión">
+            <BalanceChart data={balanceSesiones} unidadPeso={unidadPeso} />
+          </SectionCard>
+        </ProPaywall>
+      )}
 
       {/* 1RM estimado */}
-      <SectionCard title="1RM estimado">
-        <UnRMChart ejercicios={unRmEjercicios} unidadPeso={unidadPeso} />
-      </SectionCard>
+      {plan === "pro" ? (
+        <SectionCard title="1RM estimado">
+          <UnRMChart ejercicios={unRmEjercicios} unidadPeso={unidadPeso} />
+        </SectionCard>
+      ) : (
+        <ProPaywall title="1RM estimado">
+          <SectionCard title="1RM estimado">
+            <UnRMChart ejercicios={unRmEjercicios} unidadPeso={unidadPeso} />
+          </SectionCard>
+        </ProPaywall>
+      )}
 
       {/* Plateau */}
       {plateaus.length > 0 && (
-        <SectionCard title="Ejercicios estancados">
-          <PlateauList plateaus={plateaus} unidadPeso={unidadPeso} />
-        </SectionCard>
+        plan === "pro" ? (
+          <SectionCard title="Ejercicios estancados">
+            <PlateauList plateaus={plateaus} unidadPeso={unidadPeso} />
+          </SectionCard>
+        ) : (
+          <ProPaywall title="Ejercicios estancados">
+            <SectionCard title="Ejercicios estancados">
+              <PlateauList plateaus={plateaus} unidadPeso={unidadPeso} />
+            </SectionCard>
+          </ProPaywall>
+        )
       )}
 
       {/* Distribución muscular */}
       {musculoData.length >= 3 && (
-        <SectionCard title="Distribución muscular">
-          <MusculoRadarChart data={musculoData} unidadPeso={unidadPeso} />
-        </SectionCard>
+        plan === "pro" ? (
+          <SectionCard title="Distribución muscular">
+            <MusculoRadarChart data={musculoData} unidadPeso={unidadPeso} />
+          </SectionCard>
+        ) : (
+          <ProPaywall title="Distribución muscular">
+            <SectionCard title="Distribución muscular">
+              <MusculoRadarChart data={musculoData} unidadPeso={unidadPeso} />
+            </SectionCard>
+          </ProPaywall>
+        )
       )}
 
       {/* Botón de debug */}

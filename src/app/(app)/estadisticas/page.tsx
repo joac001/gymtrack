@@ -419,6 +419,7 @@ export default async function EstadisticasPage() {
         intensidad={intensidad}
         frecuencia={frecuencia}
         unidadPeso={unidadPeso}
+        plan={session!.user.plan ?? "free"}
         balanceSesiones={balanceSesiones}
         unRmEjercicios={unRmEjercicios}
         plateaus={plateaus}

@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import Routine from "@/models/Routine";
 import Link from "next/link";
 import StatsSection from "@/components/dashboard/StatsSection";
+import UpgradeBanner from "@/components/ui/UpgradeBanner";
 import WeekCalendar from "@/components/dashboard/WeekCalendar";
 import { Skeleton } from "@/components/ui/Skeleton";
 
@@ -20,6 +21,7 @@ const DIAS_ES: Record<number, string> = {
 export default async function DashboardPage() {
   const session = await auth();
   const userId = session!.user.id;
+  const plan = session?.user?.plan ?? "free";
 
   await connectDB();
   const rutina = await Routine.findOne({ userId, activa: true }).lean();
@@ -73,6 +75,9 @@ export default async function DashboardPage() {
           {fechaLabel}
         </p>
       </div>
+
+      {/* Banner upgrade para Free */}
+      {plan === "free" && <UpgradeBanner />}
 
       {/* Sin rutina activa */}
       {!rutina && (
