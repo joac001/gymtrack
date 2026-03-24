@@ -10,6 +10,19 @@ const UserSchema = new Schema(
       enum: ["kg", "lbs"],
       default: "kg",
     },
+    plan: {
+      type: String,
+      enum: ["free", "pro"],
+      default: "free",
+    },
+    planStartedAt: {
+      type: Date,
+      default: null,
+    },
+    planExpiresAt: {
+      type: Date,
+      default: null,
+    },
   },
   { strict: false, collection: "users" },
 );
