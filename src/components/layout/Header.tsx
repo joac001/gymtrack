@@ -121,6 +121,17 @@ export default function Header({ userName, userImage }: HeaderProps) {
 
                 {/* Opciones */}
                 <Link
+                  href="/pricing"
+                  onClick={() => setMenuOpen(false)}
+                  className="block w-full text-left px-2.5 py-2 text-[0.85rem] font-medium no-underline"
+                  style={{
+                    borderRadius: "var(--radius-sm)",
+                    color: "var(--push)",
+                  }}
+                >
+                  Planes y precios
+                </Link>
+                <Link
                   href="/configuracion"
                   onClick={() => setMenuOpen(false)}
                   className="block w-full text-left px-2.5 py-2 text-[0.85rem] font-medium no-underline"
