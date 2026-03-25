@@ -1,0 +1,12 @@
+name: Auth — redirige a login si no está autenticado
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+task: Verificar que un usuario no autenticado es redirigido al login
+steps:
+  - Navegar a /dashboard sin estar logueado
+  - Verificar que se redirige automáticamente a /login
+  - Navegar a /rutinas sin estar logueado
+  - Verificar que se redirige a /login
+  - Navegar a /estadisticas sin estar logueado
+  - Verificar que se redirige a /login
+expected_result: Todas las rutas protegidas redirigen a /login cuando no hay sesión activa

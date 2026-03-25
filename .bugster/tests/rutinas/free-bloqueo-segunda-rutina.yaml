@@ -1,0 +1,12 @@
+name: Free — bloqueado al crear segunda rutina
+page: /rutinas
+page_path: src/app/(app)/rutinas/page.tsx
+credential_id: free
+task: Verificar que un usuario Free que ya tiene 1 rutina no puede crear otra
+steps:
+  - Navegar a /rutinas como usuario Free que ya tiene una rutina
+  - Verificar que el botón "+ Nueva" muestra un ícono de candado
+  - Verificar que el botón apunta a /pricing en vez de /rutinas/nueva
+  - Hacer click en el botón bloqueado
+  - Verificar que redirige a la página de pricing
+expected_result: El botón "+ Nueva" está bloqueado con candado, redirige a /pricing, y el usuario NO puede acceder a /rutinas/nueva para crear una segunda rutina

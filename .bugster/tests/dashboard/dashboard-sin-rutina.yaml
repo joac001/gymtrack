@@ -1,0 +1,10 @@
+name: Dashboard — mensaje sin rutina activa
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: free
+task: Verificar que si el usuario no tiene rutina activa se muestra el mensaje correspondiente
+steps:
+  - Navegar a /dashboard como usuario Free sin rutina activa
+  - Buscar el mensaje "No tenés una rutina activa"
+  - Verificar que hay un link "Ir a Rutinas" que apunta a /rutinas
+expected_result: Se muestra el mensaje "No tenés una rutina activa" con un link a /rutinas

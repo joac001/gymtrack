@@ -1,0 +1,11 @@
+name: Pro — puede crear múltiples rutinas
+page: /rutinas
+page_path: src/app/(app)/rutinas/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro puede crear más de una rutina
+steps:
+  - Navegar a /rutinas como usuario Pro
+  - Verificar que el botón "+ Nueva" está habilitado (sin candado)
+  - Verificar que el botón apunta a /rutinas/nueva
+  - Verificar que el botón "Subir Excel" está habilitado (sin candado)
+expected_result: El botón "+ Nueva" está disponible sin restricción y apunta a /rutinas/nueva, el botón "Subir Excel" apunta a /importar

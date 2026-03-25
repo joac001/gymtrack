@@ -22,7 +22,26 @@ type Paso = "upload" | "preguntas" | "review" | "exito";
 export default function ImportarPage() {
   const { data: session } = useSession();
   const plan = session?.user?.plan === "pro" ? "pro" : "free";
+  const router = useRouter();
 
+  const [paso, setPaso] = useState<Paso>("upload");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Estado acumulado de la conversación
+  const [excelBase64, setExcelBase64] = useState<string | null>(null);
+  const [historial, setHistorial] = useState<RondaHistorial[]>([]);
+  const [ronda, setRonda] = useState(1);
+
+  // Estado del paso preguntas
+  const [preguntasActuales, setPreguntasActuales] = useState<PreguntaImport[]>([]);
+
+  // Estado del paso review
+  const [rutinas, setRutinas] = useState<RutinaImport[]>([]);
+  const [logs, setLogs] = useState<LogImport[]>([]);
+  const [ajustes, setAjustes] = useState<AjusteMenor[]>([]);
+
+  // ── Paywall Free ────────────────────────────────────────────────────────
   if (plan !== "pro") {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center">
@@ -50,24 +69,6 @@ export default function ImportarPage() {
       </div>
     );
   }
-  const router = useRouter();
-
-  const [paso, setPaso] = useState<Paso>("upload");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Estado acumulado de la conversación
-  const [excelBase64, setExcelBase64] = useState<string | null>(null);
-  const [historial, setHistorial] = useState<RondaHistorial[]>([]);
-  const [ronda, setRonda] = useState(1);
-
-  // Estado del paso preguntas
-  const [preguntasActuales, setPreguntasActuales] = useState<PreguntaImport[]>([]);
-
-  // Estado del paso review
-  const [rutinas, setRutinas] = useState<RutinaImport[]>([]);
-  const [logs, setLogs] = useState<LogImport[]>([]);
-  const [ajustes, setAjustes] = useState<AjusteMenor[]>([]);
 
   // ── STEP 1: Upload → llama a /api/import/chat ────────────────────────────
 

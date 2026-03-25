@@ -1,0 +1,16 @@
+name: Free — solo gráficos básicos visibles
+page: /estadisticas
+page_path: src/app/(app)/estadisticas/page.tsx
+credential_id: free
+task: Verificar que un usuario Free ve los 5 gráficos básicos y paywall en los avanzados
+steps:
+  - Navegar a /estadisticas como usuario Free
+  - Verificar que se muestra la sección de racha (racha actual, máxima, total entrenamientos)
+  - Verificar que se muestra el heatmap de consistencia
+  - Verificar que se muestra el gráfico de volumen semanal
+  - Verificar que se muestra el gráfico de progreso de peso
+  - Verificar que se muestra el gráfico de intensidad percibida
+  - Verificar que se muestra el gráfico de sesiones más entrenadas
+  - Verificar que hay un separador "Análisis avanzado"
+  - Verificar que debajo del separador se muestra paywall con candado y "Disponible en el plan Pro"
+expected_result: Los 5 gráficos básicos se muestran correctamente, los gráficos avanzados están detrás de un paywall con blur y link a /pricing

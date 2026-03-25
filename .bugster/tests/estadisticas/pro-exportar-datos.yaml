@@ -1,0 +1,12 @@
+name: Pro — exportar datos de gráficos
+page: /estadisticas
+page_path: src/app/(app)/estadisticas/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro puede exportar datos de gráficos al clipboard
+steps:
+  - Navegar a /estadisticas como usuario Pro
+  - Scroll hasta el final de la página
+  - Buscar el botón "Exportar datos de gráficos"
+  - Hacer click en el botón
+  - Verificar que el texto del botón cambia a "Copiado"
+expected_result: Al hacer click en "Exportar datos de gráficos", el botón muestra "Copiado" confirmando que se copió al clipboard

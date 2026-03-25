@@ -1,0 +1,13 @@
+name: Free — botón Subir Excel bloqueado
+page: /rutinas
+page_path: src/app/(app)/rutinas/page.tsx
+credential_id: free
+task: Verificar que un usuario Free ve el botón de Subir Excel bloqueado
+steps:
+  - Navegar a /rutinas como usuario Free
+  - Buscar el botón "Subir Excel"
+  - Verificar que muestra un ícono de candado
+  - Verificar que apunta a /pricing en vez de /importar
+  - Hacer click en el botón
+  - Verificar que redirige a /pricing
+expected_result: El botón "Subir Excel" está bloqueado con candado y redirige a /pricing

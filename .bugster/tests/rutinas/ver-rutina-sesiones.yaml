@@ -1,0 +1,12 @@
+name: Ver rutina — sesiones y ejercicios
+page: /rutinas
+page_path: src/app/(app)/rutinas/page.tsx
+credential_id: pro
+task: Verificar que se pueden ver las sesiones y ejercicios de una rutina
+steps:
+  - Navegar a /rutinas como usuario Pro con rutina activa
+  - Verificar que aparece al menos una rutina en la lista
+  - Hacer click en una rutina para expandirla o ver sus detalles
+  - Verificar que se muestran las sesiones (Push, Pull, Legs + Core)
+  - Verificar que cada sesión tiene ejercicios listados
+expected_result: La rutina muestra sus sesiones con nombres y colores, cada sesión tiene ejercicios con series y reps

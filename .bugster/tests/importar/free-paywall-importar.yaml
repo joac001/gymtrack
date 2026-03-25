@@ -1,0 +1,11 @@
+name: Free — paywall en página de importar
+page: /importar
+page_path: src/app/(app)/importar/page.tsx
+credential_id: free
+task: Verificar que un usuario Free ve paywall al intentar importar Excel
+steps:
+  - Navegar a /importar como usuario Free
+  - Verificar que se muestra el mensaje "Importar Excel es Pro"
+  - Verificar que hay un botón "Ver planes" que apunta a /pricing
+  - Verificar que NO se muestra el formulario de upload de archivo
+expected_result: Se muestra el paywall con el texto "Importar Excel es Pro" y un CTA a /pricing, sin acceso al upload

@@ -1,0 +1,11 @@
+name: Login con Google — usuario Free
+page: /login
+page_path: src/app/(auth)/login/page.tsx
+credential_id: free
+task: Verificar que un usuario Free puede loguearse y ve el banner de upgrade
+steps:
+  - Navegar a /login
+  - Hacer click en el botón de login con Google
+  - Completar el flujo de autenticación con las credenciales Free
+  - Esperar a ser redirigido al dashboard
+expected_result: El usuario está en /dashboard, se muestra "BIENVENIDO" y aparece el banner "Pasá a Pro" con link a /pricing

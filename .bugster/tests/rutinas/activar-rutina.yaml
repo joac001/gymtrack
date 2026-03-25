@@ -1,0 +1,12 @@
+name: Activar rutina
+page: /rutinas
+page_path: src/app/(app)/rutinas/page.tsx
+credential_id: pro
+task: Verificar que se puede activar una rutina y que aparece como activa
+steps:
+  - Navegar a /rutinas como usuario Pro
+  - Buscar una rutina que no esté activa
+  - Activar la rutina usando el botón o toggle correspondiente
+  - Verificar que la rutina se marca como activa
+  - Navegar a /dashboard y verificar que el calendario muestra las sesiones de la rutina activada
+expected_result: La rutina se activa correctamente, se refleja visualmente en la lista y el dashboard muestra las sesiones

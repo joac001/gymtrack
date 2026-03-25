@@ -1,0 +1,14 @@
+name: Pro — cerrar y reabrir chat mantiene historial
+page: /dashboard
+page_path: src/components/chat/ChatWidget.tsx
+credential_id: pro
+task: Verificar que cerrar y reabrir el chat mantiene los mensajes de la sesión
+steps:
+  - Navegar a /dashboard como usuario Pro
+  - Abrir el chat y enviar un mensaje "Hola"
+  - Esperar la respuesta
+  - Cerrar el chat con el botón X
+  - Verificar que se muestra el botón flotante
+  - Volver a abrir el chat
+  - Verificar que los mensajes previos siguen visibles
+expected_result: Al reabrir el chat, los mensajes enviados y recibidos siguen visibles en la conversación

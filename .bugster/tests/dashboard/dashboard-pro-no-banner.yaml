@@ -1,0 +1,11 @@
+name: Dashboard Pro — sin banner de upgrade
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro no ve el banner de upgrade en el dashboard
+steps:
+  - Navegar a /dashboard como usuario Pro
+  - Verificar que se muestra el saludo con el nombre del usuario
+  - Verificar que se muestra la fecha actual
+  - Buscar si existe el banner "Pasá a Pro"
+expected_result: El dashboard se carga correctamente, muestra el saludo y la fecha, y NO muestra el banner "Pasá a Pro"

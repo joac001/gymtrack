@@ -1,0 +1,11 @@
+name: Dashboard Free — muestra banner de upgrade
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: free
+task: Verificar que un usuario Free ve el banner de upgrade en el dashboard
+steps:
+  - Navegar a /dashboard como usuario Free
+  - Verificar que se muestra el saludo
+  - Buscar el banner "Pasá a Pro"
+  - Verificar que el banner tiene un link a /pricing
+expected_result: El dashboard muestra el banner "Pasá a Pro" con el texto "$7/mes" y un enlace a /pricing

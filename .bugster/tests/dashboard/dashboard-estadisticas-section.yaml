@@ -1,0 +1,10 @@
+name: Dashboard — sección de estadísticas se carga
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: pro
+task: Verificar que la sección de estadísticas del dashboard se carga con datos
+steps:
+  - Navegar a /dashboard como usuario Pro con entrenamientos
+  - Esperar a que se cargue la sección de estadísticas (puede tener skeleton loading)
+  - Verificar que se muestran stats como racha, entrenamientos totales o similar
+expected_result: La sección de estadísticas se carga y muestra datos reales del usuario

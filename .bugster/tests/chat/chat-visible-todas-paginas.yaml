@@ -1,0 +1,12 @@
+name: Chat — botón flotante visible en todas las páginas
+page: /dashboard
+page_path: src/components/layout/AppShell.tsx
+credential_id: pro
+task: Verificar que el botón flotante del chat aparece en todas las páginas de la app
+steps:
+  - Navegar a /dashboard y verificar que el botón flotante de chat está visible
+  - Navegar a /rutinas y verificar que el botón flotante de chat está visible
+  - Navegar a /historial y verificar que el botón flotante de chat está visible
+  - Navegar a /estadisticas y verificar que el botón flotante de chat está visible
+  - Navegar a /configuracion y verificar que el botón flotante de chat está visible
+expected_result: El botón flotante de chat (ícono de mensaje naranja) está presente en todas las páginas de la aplicación

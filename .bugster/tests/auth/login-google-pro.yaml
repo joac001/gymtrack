@@ -1,0 +1,11 @@
+name: Login con Google — usuario Pro
+page: /login
+page_path: src/app/(auth)/login/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro puede loguearse con Google OAuth y llega al dashboard
+steps:
+  - Navegar a /login
+  - Hacer click en el botón de login con Google
+  - Completar el flujo de autenticación con las credenciales Pro
+  - Esperar a ser redirigido al dashboard
+expected_result: El usuario está en /dashboard, se muestra "BIENVENIDO" con el nombre del usuario y NO se muestra el banner "Pasá a Pro"

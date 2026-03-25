@@ -1,0 +1,11 @@
+name: Pro — historial completo sin límite
+page: /historial
+page_path: src/app/(app)/historial/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro ve todo su historial de entrenamientos sin restricción de fecha
+steps:
+  - Navegar a /historial como usuario Pro
+  - Verificar que se muestra la lista de entrenamientos
+  - Verificar que hay entrenamientos de diferentes meses
+  - Verificar que se muestran datos como nombre de sesión, fecha, intensidad y volumen
+expected_result: El historial muestra todos los entrenamientos del usuario sin restricción temporal, con datos completos por cada entrada

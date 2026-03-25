@@ -1,0 +1,13 @@
+name: Free — puede crear su primera rutina
+page: /rutinas
+page_path: src/app/(app)/rutinas/page.tsx
+credential_id: free
+task: Verificar que un usuario Free sin rutinas puede crear una rutina nueva
+steps:
+  - Navegar a /rutinas como usuario Free que no tiene rutinas
+  - Verificar que el botón "+ Nueva" está habilitado y apunta a /rutinas/nueva
+  - Hacer click en "+ Nueva"
+  - Verificar que se carga la página de creación de rutina
+  - Completar el nombre de la rutina con "Mi Primera Rutina"
+  - Guardar la rutina
+expected_result: La rutina se crea correctamente y el usuario es redirigido a la lista de rutinas donde aparece "Mi Primera Rutina"

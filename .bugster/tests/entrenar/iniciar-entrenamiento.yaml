@@ -1,0 +1,13 @@
+name: Entrenar — iniciar sesión de entrenamiento
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: pro
+task: Verificar que se puede iniciar una sesión de entrenamiento desde el dashboard
+steps:
+  - Navegar a /dashboard como usuario Pro con rutina activa
+  - Buscar una sesión en el calendario semanal
+  - Hacer click en la sesión para iniciar el entrenamiento
+  - Verificar que se carga la pantalla de entrenamiento
+  - Verificar que se muestran los ejercicios de esa sesión
+  - Verificar que cada ejercicio tiene campos para registrar peso y reps por serie
+expected_result: Se abre la pantalla de entrenamiento con los ejercicios de la sesión, cada uno con campos editables para peso y reps

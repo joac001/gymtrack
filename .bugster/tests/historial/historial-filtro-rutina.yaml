@@ -1,0 +1,11 @@
+name: Historial — filtrar por rutina
+page: /historial
+page_path: src/app/(app)/historial/page.tsx
+credential_id: pro
+task: Verificar que se puede filtrar el historial por rutina
+steps:
+  - Navegar a /historial como usuario Pro
+  - Buscar el filtro o selector de rutina
+  - Seleccionar una rutina específica
+  - Verificar que solo se muestran entrenamientos de esa rutina
+expected_result: Al filtrar por rutina, solo aparecen los entrenamientos correspondientes a esa rutina

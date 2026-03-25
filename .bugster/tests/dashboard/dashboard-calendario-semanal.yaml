@@ -1,0 +1,11 @@
+name: Dashboard — calendario semanal con rutina activa
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: pro
+task: Verificar que el calendario semanal se muestra cuando hay una rutina activa
+steps:
+  - Navegar a /dashboard como usuario Pro (que tiene rutina activa)
+  - Verificar que se muestra el calendario semanal con las sesiones
+  - Verificar que el día actual está resaltado
+  - Verificar que se muestran los nombres de las sesiones (Push, Pull, Legs)
+expected_result: El calendario semanal se muestra con las sesiones de la rutina distribuidas por día, el día actual está marcado visualmente

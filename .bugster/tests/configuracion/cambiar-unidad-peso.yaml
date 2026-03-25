@@ -1,0 +1,13 @@
+name: Configuración — cambiar unidad de peso
+page: /configuracion
+page_path: src/app/(app)/configuracion/page.tsx
+credential_id: pro
+task: Verificar que se puede cambiar la unidad de peso entre kg y lbs
+steps:
+  - Navegar a /configuracion
+  - Buscar el selector de unidad de peso
+  - Verificar que muestra la opción actual (kg o lbs)
+  - Cambiar a la otra unidad
+  - Verificar que el cambio se guarda
+  - Navegar a /estadisticas y verificar que los pesos se muestran en la nueva unidad
+expected_result: La unidad de peso se cambia correctamente y se refleja en los gráficos de estadísticas

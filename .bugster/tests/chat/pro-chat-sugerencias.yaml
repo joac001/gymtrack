@@ -1,0 +1,13 @@
+name: Pro — chat IA muestra sugerencias
+page: /dashboard
+page_path: src/components/chat/ChatWidget.tsx
+credential_id: pro
+task: Verificar que un usuario Pro ve las sugerencias al abrir el chat sin historial
+steps:
+  - Navegar a /dashboard como usuario Pro
+  - Hacer click en el botón flotante de chat
+  - Verificar que se muestra "Coach IA" en el header del panel
+  - Verificar que aparece "Preguntame sobre tu entrenamiento"
+  - Verificar que se muestran 4 botones de sugerencia
+  - Verificar que hay un campo de input con placeholder "Preguntá algo..."
+expected_result: El chat muestra 4 sugerencias de preguntas y un input habilitado para escribir

@@ -1,0 +1,15 @@
+name: Pro — enviar mensaje al chat IA
+page: /dashboard
+page_path: src/components/chat/ChatWidget.tsx
+credential_id: pro
+task: Verificar que un usuario Pro puede enviar un mensaje y recibir respuesta del coach IA
+steps:
+  - Navegar a /dashboard como usuario Pro
+  - Abrir el chat haciendo click en el botón flotante
+  - Escribir "¿Cómo viene mi progreso?" en el input
+  - Hacer click en el botón enviar o presionar Enter
+  - Verificar que aparece el mensaje del usuario como burbuja a la derecha
+  - Verificar que aparece "Pensando..." con un spinner
+  - Esperar a que llegue la respuesta
+  - Verificar que la respuesta del coach aparece como burbuja a la izquierda
+expected_result: El mensaje se envía, se muestra loading, y la respuesta del coach aparece formateada con markdown en una burbuja diferente al mensaje del usuario

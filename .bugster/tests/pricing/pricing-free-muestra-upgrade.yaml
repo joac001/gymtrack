@@ -1,0 +1,10 @@
+name: Pricing — Free user ve botón de upgrade
+page: /pricing
+page_path: src/app/(app)/pricing/page.tsx
+credential_id: free
+task: Verificar que un usuario Free ve el botón de upgrade en la card Pro
+steps:
+  - Navegar a /pricing como usuario Free
+  - Verificar que la card Free muestra "Tu plan actual" o indicador similar
+  - Verificar que la card Pro tiene un botón de acción para hacer upgrade
+expected_result: La card Free indica que es el plan actual y la card Pro tiene un CTA para hacer upgrade

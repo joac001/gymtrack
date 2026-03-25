@@ -1,0 +1,11 @@
+name: Pro — acceso al importador de Excel
+page: /importar
+page_path: src/app/(app)/importar/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro puede acceder al importador de Excel
+steps:
+  - Navegar a /importar como usuario Pro
+  - Verificar que NO se muestra el paywall
+  - Verificar que se muestra el formulario de upload de archivo
+  - Verificar que hay un área para arrastrar o seleccionar un archivo Excel
+expected_result: El importador se muestra correctamente con el formulario de upload, sin paywall

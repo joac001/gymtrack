@@ -1,0 +1,11 @@
+name: Estadísticas — mensaje sin entrenamientos
+page: /estadisticas
+page_path: src/app/(app)/estadisticas/page.tsx
+credential_id: free
+task: Verificar que un usuario sin entrenamientos ve el mensaje adecuado
+steps:
+  - Navegar a /estadisticas como usuario Free sin entrenamientos registrados
+  - Verificar que se muestra el título "Estadísticas"
+  - Verificar que aparece el mensaje "Todavía no tenés entrenamientos registrados"
+  - Verificar que NO se muestran gráficos
+expected_result: Se muestra el mensaje indicando que no hay entrenamientos y sugiriendo empezar a entrenar, sin gráficos visibles

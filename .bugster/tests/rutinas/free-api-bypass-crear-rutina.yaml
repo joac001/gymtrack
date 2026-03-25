@@ -1,0 +1,11 @@
+name: Free — API bloquea creación de segunda rutina
+page: /rutinas
+page_path: src/app/api/routines/route.ts
+credential_id: free
+task: Verificar que la API no permite crear una segunda rutina para un usuario Free aunque se intente directamente
+steps:
+  - Loguearse como usuario Free que ya tiene 1 rutina
+  - Navegar a /rutinas/nueva directamente por URL
+  - Intentar crear una rutina completando el formulario
+  - Verificar que se muestra un error indicando que el plan Free permite solo 1 rutina
+expected_result: La API retorna error 403 con mensaje "El plan Free permite solo 1 rutina. Pasá a Pro para crear más." y la rutina no se crea

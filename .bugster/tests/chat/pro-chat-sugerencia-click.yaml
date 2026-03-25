@@ -1,0 +1,14 @@
+name: Pro — click en sugerencia envía mensaje
+page: /dashboard
+page_path: src/components/chat/ChatWidget.tsx
+credential_id: pro
+task: Verificar que hacer click en una sugerencia envía el mensaje automáticamente
+steps:
+  - Navegar a /dashboard como usuario Pro
+  - Abrir el chat
+  - Hacer click en la primera sugerencia ("¿Cómo viene mi progreso?")
+  - Verificar que el mensaje aparece como burbuja del usuario
+  - Verificar que las sugerencias desaparecen
+  - Esperar la respuesta del coach
+  - Verificar que llega una respuesta
+expected_result: Al clickear la sugerencia, se envía automáticamente como mensaje, desaparecen las sugerencias y se recibe respuesta del coach

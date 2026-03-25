@@ -1,0 +1,15 @@
+name: Pricing — muestra cards Free y Pro
+page: /pricing
+page_path: src/app/(app)/pricing/page.tsx
+credential_id: free
+task: Verificar que la página de pricing muestra las cards de Free y Pro correctamente
+steps:
+  - Navegar a /pricing
+  - Verificar que se muestra el título "ELEGÍ TU PLAN"
+  - Verificar que hay una card "Free" con precio "$0"
+  - Verificar que hay una card "Pro" con precio "$7/mes"
+  - Verificar que la card Pro tiene el badge "Recomendado"
+  - Verificar que cada card lista las features incluidas y excluidas
+  - Verificar que la card Free muestra "1 rutina", "3 meses historial"
+  - Verificar que la card Pro muestra "Rutinas ilimitadas", "Chat IA", "Historial ilimitado"
+expected_result: Ambas cards se muestran con precios, features, y la card Pro tiene badge "Recomendado"

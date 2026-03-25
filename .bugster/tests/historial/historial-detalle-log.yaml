@@ -1,0 +1,12 @@
+name: Historial — ver detalle de un entrenamiento
+page: /historial
+page_path: src/app/(app)/historial/page.tsx
+credential_id: pro
+task: Verificar que se puede expandir un entrenamiento del historial para ver el detalle
+steps:
+  - Navegar a /historial como usuario Pro
+  - Hacer click en un entrenamiento de la lista
+  - Verificar que se expande y muestra los ejercicios realizados
+  - Verificar que cada ejercicio muestra series, reps y peso
+  - Verificar que se muestra la intensidad percibida (RPE)
+expected_result: El detalle del entrenamiento muestra todos los ejercicios con sus sets (reps x peso), la intensidad y el color de la sesión

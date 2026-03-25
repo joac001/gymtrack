@@ -1,0 +1,13 @@
+name: Entrenar — agregar ejercicio extra durante entrenamiento
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: pro
+task: Verificar que se puede agregar un ejercicio extra durante el entrenamiento
+steps:
+  - Iniciar una sesión de entrenamiento como usuario Pro
+  - Buscar el botón para agregar ejercicio extra
+  - Agregar un ejercicio que no está en la rutina
+  - Registrar peso y reps para el ejercicio extra
+  - Guardar el entrenamiento
+  - Verificar en historial que el ejercicio extra aparece marcado
+expected_result: El ejercicio extra se agrega al entrenamiento, se puede registrar peso/reps y aparece en el historial marcado como extra

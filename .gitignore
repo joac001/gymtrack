@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# bugster
+.bugster/.env
+
 # dependencies
 /node_modules
 /.pnp
@@ -45,3 +48,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vscode
+# Bugster
+.bugster/results/
+.bugster/screenshots/
+.bugster/videos/
+.bugster/logs/
+.bugster/reports/
+*.bugster.log
+.bugster/paths.json
+.bugster/ui_config_cache.json
+.bugster/files/
+.bugster/*/import_tree.json
+.bugster/.sessions/
+

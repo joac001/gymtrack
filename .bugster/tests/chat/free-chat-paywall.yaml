@@ -1,0 +1,13 @@
+name: Free — chat IA muestra paywall
+page: /dashboard
+page_path: src/components/chat/ChatWidget.tsx
+credential_id: free
+task: Verificar que un usuario Free ve el paywall al abrir el chat IA
+steps:
+  - Navegar a /dashboard como usuario Free
+  - Buscar el botón flotante de chat (ícono de mensaje naranja en esquina inferior derecha)
+  - Hacer click en el botón para abrir el chat
+  - Verificar que se muestra "Coach IA disponible en Pro"
+  - Verificar que hay un botón "Ver planes" que apunta a /pricing
+  - Verificar que NO hay campo de input para escribir mensajes
+expected_result: El panel de chat se abre y muestra el paywall con texto "Coach IA disponible en Pro" y CTA a /pricing, sin input de mensajes

@@ -1,0 +1,11 @@
+name: Free — historial limitado a 3 meses
+page: /historial
+page_path: src/app/(app)/historial/page.tsx
+credential_id: free
+task: Verificar que un usuario Free solo ve entrenamientos de los últimos 3 meses
+steps:
+  - Navegar a /historial como usuario Free
+  - Verificar que se muestra la lista de entrenamientos
+  - Revisar las fechas de los entrenamientos mostrados
+  - Verificar que no hay entrenamientos con fecha anterior a 3 meses atrás
+expected_result: Todos los entrenamientos listados tienen fecha dentro de los últimos 3 meses, no se muestran entrenamientos más antiguos

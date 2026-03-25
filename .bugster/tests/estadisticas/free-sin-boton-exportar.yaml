@@ -1,0 +1,10 @@
+name: Free — botón exportar datos no visible
+page: /estadisticas
+page_path: src/app/(app)/estadisticas/page.tsx
+credential_id: free
+task: Verificar que un usuario Free no ve el botón de exportar datos
+steps:
+  - Navegar a /estadisticas como usuario Free
+  - Scroll hasta el final de la página
+  - Buscar el botón "Exportar datos de gráficos"
+expected_result: El botón "Exportar datos de gráficos" NO está visible para el usuario Free

@@ -1,0 +1,14 @@
+name: Entrenar — completar y guardar entrenamiento
+page: /dashboard
+page_path: src/app/(app)/dashboard/page.tsx
+credential_id: pro
+task: Verificar que se puede completar un entrenamiento registrando peso, reps e intensidad
+steps:
+  - Navegar a /dashboard como usuario Pro con rutina activa
+  - Iniciar una sesión de entrenamiento
+  - Registrar peso y reps en al menos 2 ejercicios
+  - Seleccionar una intensidad percibida (RPE) entre 1 y 10
+  - Guardar el entrenamiento
+  - Verificar que se muestra confirmación de guardado
+  - Navegar a /historial y verificar que el entrenamiento aparece
+expected_result: El entrenamiento se guarda correctamente y aparece en el historial con los datos registrados

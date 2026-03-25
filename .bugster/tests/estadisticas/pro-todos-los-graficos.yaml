@@ -1,0 +1,14 @@
+name: Pro — todos los gráficos disponibles
+page: /estadisticas
+page_path: src/app/(app)/estadisticas/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro ve todos los gráficos sin paywall
+steps:
+  - Navegar a /estadisticas como usuario Pro
+  - Verificar que se muestran los gráficos básicos (racha, consistencia, volumen, peso, intensidad, frecuencia)
+  - Verificar que se muestra "Balance de volumen por sesión" sin paywall
+  - Verificar que se muestra "1RM estimado" sin paywall
+  - Verificar que se muestra "Ejercicios estancados" sin paywall (si hay plateaus)
+  - Verificar que se muestra "Distribución muscular" sin paywall (si hay datos suficientes)
+  - Verificar que se muestra el botón "Exportar datos de gráficos"
+expected_result: Todos los gráficos se muestran sin blur ni paywall, el botón de exportar está visible

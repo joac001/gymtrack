@@ -1,0 +1,12 @@
+name: Pricing — accesible desde el header
+page: /dashboard
+page_path: src/components/layout/Header.tsx
+credential_id: free
+task: Verificar que se puede acceder a /pricing desde el menú del header
+steps:
+  - Navegar a /dashboard como usuario Free
+  - Abrir el menú desplegable del header (click en avatar o menú)
+  - Buscar el link "Planes y precios"
+  - Hacer click en "Planes y precios"
+  - Verificar que se navega a /pricing
+expected_result: El menú del header tiene un link "Planes y precios" que navega correctamente a /pricing

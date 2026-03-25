@@ -1,0 +1,10 @@
+name: Pricing — Pro user ve su plan como actual
+page: /pricing
+page_path: src/app/(app)/pricing/page.tsx
+credential_id: pro
+task: Verificar que un usuario Pro ve la card Pro marcada como plan actual
+steps:
+  - Navegar a /pricing como usuario Pro
+  - Verificar que la card Pro muestra indicador de "Tu plan actual" o similar
+  - Verificar que NO hay botón de upgrade en la card Pro
+expected_result: La card Pro está marcada como el plan actual del usuario
