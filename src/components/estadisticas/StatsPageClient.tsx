@@ -246,25 +246,27 @@ export default function StatsPageClient({
         )
       )}
 
-      {/* Botón de debug */}
-      <ExportarDatosBtn
-        rachaActual={rachaActual}
-        rachaMaxima={rachaMaxima}
-        totalEntrenamientos={totalEntrenamientos}
-        totalSemanas={totalSemanas}
-        consistencia={consistencia}
-        consistenciaDesde={consistenciaDesde}
-        consistenciaHasta={consistenciaHasta}
-        volumenSemanal={volumenSemanal}
-        ejercicios={ejercicios}
-        intensidad={intensidad}
-        frecuencia={frecuencia}
-        unidadPeso={unidadPeso}
-        balanceSesiones={balanceSesiones}
-        unRmEjercicios={unRmEjercicios}
-        plateaus={plateaus}
-        musculoData={musculoData}
-      />
+      {/* Botón exportar datos — solo Pro */}
+      {plan === "pro" && (
+        <ExportarDatosBtn
+          rachaActual={rachaActual}
+          rachaMaxima={rachaMaxima}
+          totalEntrenamientos={totalEntrenamientos}
+          totalSemanas={totalSemanas}
+          consistencia={consistencia}
+          consistenciaDesde={consistenciaDesde}
+          consistenciaHasta={consistenciaHasta}
+          volumenSemanal={volumenSemanal}
+          ejercicios={ejercicios}
+          intensidad={intensidad}
+          frecuencia={frecuencia}
+          unidadPeso={unidadPeso}
+          balanceSesiones={balanceSesiones}
+          unRmEjercicios={unRmEjercicios}
+          plateaus={plateaus}
+          musculoData={musculoData}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Table } from "lucide-react";
+import { Table, Lock } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
@@ -34,35 +34,74 @@ async function RutinasContent() {
   return <RutinasLista rutinas={rutinasSerializadas as any} />;
 }
 
-export default function RutinasPage() {
+export default async function RutinasPage() {
+  const session = await auth();
+  const plan = session?.user?.plan === "pro" ? "pro" : "free";
+
+  await connectDB();
+  const rutinaCount = await Routine.countDocuments({ userId: session!.user.id });
+  const canCreate = plan === "pro" || rutinaCount < 1;
+
   return (
     <div>
       {/* Header */}
       <div className="mb-6">
         <div className="flex justify-end gap-2 mb-3">
-          <Link
-            href="/importar"
-            className="text-[0.8rem] font-semibold no-underline px-3 py-1.5 flex items-center gap-1.5"
-            style={{
-              background: "#16a34a",
-              color: "#fff",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
-            <Table size={13} strokeWidth={2.5} />
-            Subir Excel
-          </Link>
-          <Link
-            href="/rutinas/nueva"
-            className="text-[0.8rem] font-semibold no-underline px-3 py-1.5"
-            style={{
-              background: "var(--push)",
-              color: "#fff",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
-            + Nueva
-          </Link>
+          {plan === "pro" ? (
+            <Link
+              href="/importar"
+              className="text-[0.8rem] font-semibold no-underline px-3 py-1.5 flex items-center gap-1.5"
+              style={{
+                background: "#16a34a",
+                color: "#fff",
+                borderRadius: "var(--radius-md)",
+              }}
+            >
+              <Table size={13} strokeWidth={2.5} />
+              Subir Excel
+            </Link>
+          ) : (
+            <Link
+              href="/pricing"
+              className="text-[0.8rem] font-semibold no-underline px-3 py-1.5 flex items-center gap-1.5"
+              style={{
+                background: "var(--surface)",
+                color: "var(--text-muted)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <Lock size={11} />
+              Subir Excel
+            </Link>
+          )}
+          {canCreate ? (
+            <Link
+              href="/rutinas/nueva"
+              className="text-[0.8rem] font-semibold no-underline px-3 py-1.5"
+              style={{
+                background: "var(--push)",
+                color: "#fff",
+                borderRadius: "var(--radius-md)",
+              }}
+            >
+              + Nueva
+            </Link>
+          ) : (
+            <Link
+              href="/pricing"
+              className="text-[0.8rem] font-semibold no-underline px-3 py-1.5 flex items-center gap-1.5"
+              style={{
+                background: "var(--surface)",
+                color: "var(--text-muted)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <Lock size={11} />
+              + Nueva
+            </Link>
+          )}
         </div>
         <h1
           className="text-[1.8rem] tracking-wider m-0"

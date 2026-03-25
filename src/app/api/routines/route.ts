@@ -33,6 +33,18 @@ export async function POST(req: Request) {
 
     await connectDB();
 
+    // Gate: free solo puede tener 1 rutina
+    const plan = session.user.plan === "pro" ? "pro" : "free";
+    if (plan === "free") {
+      const count = await Routine.countDocuments({ userId: session.user.id });
+      if (count >= 1) {
+        return NextResponse.json(
+          { error: "El plan Free permite solo 1 rutina. Pasá a Pro para crear más." },
+          { status: 403 },
+        );
+      }
+    }
+
     const rutina = await Routine.create({
       userId: session.user.id,
       nombre: nombre.trim(),

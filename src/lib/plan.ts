@@ -14,25 +14,28 @@ export async function getUserPlan(): Promise<{ userId: string; plan: Plan } | nu
 
   return {
     userId: session.user.id,
-    plan: session.user.plan ?? "free",
+    plan: normalizePlan(session.user.plan),
   };
 }
 
 /**
  * Verifica si el usuario tiene plan Pro.
- * Para usar en API routes como gate rápido.
+ * Consulta la DB directamente para evitar JWT desactualizado.
  */
 export async function requirePro(): Promise<{
   userId: string;
   plan: Plan;
   authorized: boolean;
 }> {
-  const result = await getUserPlan();
-  if (!result) return { userId: "", plan: "free", authorized: false };
+  const session = await auth();
+  if (!session?.user?.id) return { userId: "", plan: "free", authorized: false };
+
+  const plan = await getFreshPlan(session.user.id);
 
   return {
-    ...result,
-    authorized: result.plan === "pro",
+    userId: session.user.id,
+    plan,
+    authorized: plan === "pro",
   };
 }
 
@@ -42,5 +45,13 @@ export async function requirePro(): Promise<{
 export async function getFreshPlan(userId: string): Promise<Plan> {
   await connectDB();
   const user = await User.findById(userId).select("plan").lean();
-  return ((user as { plan?: string } | null)?.plan as Plan) ?? "free";
+  return normalizePlan((user as { plan?: string } | null)?.plan);
+}
+
+/**
+ * Normaliza cualquier valor a "free" | "pro".
+ * Si no es exactamente "pro", es "free". Punto.
+ */
+export function normalizePlan(value: unknown): Plan {
+  return value === "pro" ? "pro" : "free";
 }

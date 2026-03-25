@@ -8,41 +8,35 @@ _(ninguna)_
 
 ### Core Features
 
-- [ ] **Auth:** Google OAuth (ya hecho ✅)
-- [ ] **CRUD Rutinas:** sesiones, ejercicios, drag & drop (ya hecho ✅)
-- [ ] **Log Entrenamientos:** peso, reps, series, intensidad (ya hecho ✅)
-- [ ] **Historial básico:** últimos 3 meses (ya hecho ✅)
-- [ ] **5 Gráficos básicos:** peso, racha, volumen, frecuencia, RPE (ya hecho ✅)
-- [ ] **Import Excel:** con chat Gemini (ya hecho ✅)
-- [ ] **Configuración usuario:** kg/lbs (ya hecho ✅)
-- [ ] **Drag & drop ejercicios** (ya hecho ✅)
+- [x] **Auth:** Google OAuth
+- [x] **CRUD Rutinas:** sesiones, ejercicios, drag & drop
+- [x] **Log Entrenamientos:** peso, reps, series, intensidad
+- [x] **Historial básico:** últimos 3 meses
+- [x] **5 Gráficos básicos:** peso, racha, volumen, frecuencia, RPE
+- [x] **Import Excel:** con chat Gemini (solo Pro)
+- [x] **Configuración usuario:** kg/lbs
+- [x] **Drag & drop ejercicios**
 
 ### Pagos + Tiers
 
-- [ ] **Integración Talo:** setup producto, webhook
-- [ ] **User Model:** agregar campo `plan: 'free' | 'pro'`
-- [ ] **Página /pricing:** mostrar Free vs Pro
-- [ ] **Tier Free:** 1 rutina, 3 meses historial, sin chat IA
-- [ ] **Tier Pro ($7/mes):** rutinas ilimitadas, historial ilimitado, chat IA básico
+- [x] **User Model:** campo `plan: 'free' | 'pro'`, defaults en createUser
+- [x] **Página /pricing:** Free vs Pro, responsive
+- [x] **Gates Free:** 1 rutina, 3 meses historial, sin chat IA, sin import, sin gráficos avanzados
+- [x] **Gates Pro:** rutinas ilimitadas, historial ilimitado, chat IA, import Excel, gráficos avanzados
+- [x] **Banner upgrade:** en dashboard para usuarios Free
+- [x] **Paywalls:** ProPaywall en stats avanzados, ChatWidget, Import page
+- [ ] **Integración Talo:** setup producto, webhook, checkout (⏸️ bloqueado — faltan datos del negocio)
 
 ### Chat IA
 
-- [ ] **Endpoint /api/chat:** recibe pregunta, retorna respuesta Gemini
-  - [ ] Contexto: resumen rutina + últimos 20 logs + gráficos
-  - [ ] System prompt: "Eres coach de fitness..."
-- [ ] **ChatsWidget:** componente de chat (input, historial, loading)
-- [ ] **Gate:** `/api/chat` solo si `plan === 'pro'`
-- [ ] **Ejemplos de preguntas:** sugerencias de Q&A
-
-### UI/UX
-
-- [ ] **Página /pricing:** responsive, mobile-first
-- [ ] **Banner en Free:** "Upgrade a Pro"
-- [ ] **Gates visuales:** mostrar paywall en features Pro
+- [x] **Endpoint /api/chat:** contexto rutina + 20 logs + stats, gate Pro
+- [x] **ChatWidget:** FAB flotante, historial, sugerencias, paywall Free
+- [x] **System prompt:** coach fitness en español rioplatense
+- [x] **Integración en AppShell:** disponible en toda la app
 
 ### Testing
 
-- [ ] **End-to-end:** flujo completo de pago Talo
+- [ ] **Integración Talo:** flujo completo de pago (⏸️ bloqueado)
 - [ ] **Mobile:** testing en iOS/Android
 - [ ] **Chat IA:** calidad de respuestas
 
@@ -126,6 +120,16 @@ _(ninguna)_
 
 **Trigger:** Chat IA adoption >80%, usuarios piden más IA
 
+### Chat IA v2 — Arquitectura agéntica
+- [ ] **Historial de conversaciones:** modelo ChatConversation en MongoDB (mensajes, metadata, timestamps)
+- [ ] **UI tipo Claude:** lista de chats históricos + nuevo chat + continuar conversación
+- [ ] **Tool-calling:** IA decide si necesita datos → los obtiene via tool → responde con contexto
+- [ ] **Memoria por conversación:** qué datos ya se obtuvieron, resumen acumulado
+- [ ] **Ventana de contexto:** límite de tokens por chat, compresión o cierre automático
+- [ ] **RAG con embeddings:** MongoDB Atlas Vector Search para obtener solo chunks relevantes
+- [ ] **Prompt dinámico:** la IA escribe su propio query de búsqueda en vez de dump completo
+
+### Otras features IA
 - [ ] **Análisis de mesetas automático:** widget + recomendaciones
 - [ ] **Optimización de rutina automática:** sugerencias basadas en progreso
 - [ ] **Generación de rutina desde cero:** user input → Gemini genera
@@ -139,6 +143,14 @@ _(ninguna)_
 
 **Trigger:** Product maduro, foco en retention
 
+### i18n + Personalización del coach IA
+- [ ] **Variantes de español:** rioplatense (actual), mexicano, español peninsular — selector en config
+- [ ] **Idiomas nuevos:** inglés y portugués (UI completa + system prompt de la IA)
+- [ ] **Tono del coach:** formal, motivador, técnico, relajado — configurable por usuario
+- [ ] **System prompt dinámico:** se arma según idioma + variante + tono elegidos
+- [ ] **UI i18n:** extraer strings a archivos de traducción (es-AR, es-MX, es-ES, en, pt-BR)
+
+### Otras features
 - [ ] **Notas de recuperación:** sueño, dolor previo, nutrición
 - [ ] **PR automático:** detectar + celebración visual
 - [ ] **Calendario de entrenamientos:** visualización mensual
@@ -165,6 +177,8 @@ _(ninguna)_
 ✅ **Chat IA:** diferencial principal desde MVP
 ✅ **Validación por etapa:** cada etapa requiere proof antes de siguente
 ✅ **Roadmap atemporal:** evolucionan según validaciones, no según tiempo
+✅ **Import Excel:** solo Pro (consume tokens Gemini)
+✅ **Embeddings/RAG:** diferido para futuro, chat actual usa context stuffing
 
 ---
 
@@ -180,4 +194,3 @@ _(ninguna)_
 | 5 | Chat adoption >80% | IA premium features viable |
 | 6 | Product stable | Churn < 5% MoM |
 | 7 | Ecosystem alive | Network effects visible |
-

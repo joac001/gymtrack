@@ -15,13 +15,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  events: {
+    async createUser({ user }) {
+      // Cuando NextAuth crea un usuario nuevo, agregar campos default de GymTrack
+      if (user.id) {
+        const db = (await mongoClient.connect()).db();
+        await db.collection("users").updateOne(
+          { _id: new ObjectId(user.id) },
+          { $set: { plan: "free", unidadPeso: "kg" } },
+        );
+      }
+    },
+  },
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user }) {
       if (user) token.id = user.id;
 
-      // Cargar plan desde MongoDB al hacer login o cuando se refresca la sesión
-      if (token.id && (user || trigger === "update")) {
+      // Leer plan fresco de MongoDB en cada refresh del JWT
+      if (token.id) {
         const db = (await mongoClient.connect()).db();
         const dbUser = await db
           .collection("users")
@@ -29,10 +41,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             { _id: new ObjectId(token.id) },
             { projection: { plan: 1 } },
           );
-        token.plan = (dbUser?.plan as "free" | "pro") ?? "free";
+        // Normalizar: si no es exactamente "pro", es "free"
+        token.plan = dbUser?.plan === "pro" ? "pro" : "free";
       }
 
-      // Si no se cargó aún, default a free
       if (!token.plan) token.plan = "free";
 
       return token;
@@ -40,7 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        session.user.plan = (token.plan as "free" | "pro") ?? "free";
+        session.user.plan = token.plan === "pro" ? "pro" : "free";
       }
       return session;
     },

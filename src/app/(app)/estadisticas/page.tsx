@@ -104,8 +104,18 @@ export default async function EstadisticasPage() {
   await connectDB();
 
   const userId = session.user.id;
+  const plan = session.user.plan === "pro" ? "pro" : "free";
+
+  // Gate: free solo ve últimos 3 meses
+  const logsQuery: Record<string, unknown> = { userId };
+  if (plan === "free") {
+    const tresMesesAtras = new Date();
+    tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
+    logsQuery.fecha = { $gte: tresMesesAtras };
+  }
+
   const [logs, userDoc] = await Promise.all([
-    WorkoutLog.find({ userId }).sort({ fecha: 1 }).lean(),
+    WorkoutLog.find(logsQuery).sort({ fecha: 1 }).lean(),
     User.findById(userId).lean(),
   ]);
   const unidadPeso = ((userDoc as { unidadPeso?: string } | null)?.unidadPeso ?? "kg") as "kg" | "lbs";
@@ -228,172 +238,170 @@ export default async function EstadisticasPage() {
     ([sesion, { color, cantidad }]) => ({ sesion, color, cantidad }),
   );
 
-  // ── Balance de volumen por sesión ─────────────────────────────────────────
-  const balanceMap = new Map<string, { color: string; volumen: number }>();
-  for (const log of logs) {
-    const nombre = log.sesionNombre ?? "Sin nombre";
-    let vol = 0;
-    for (const ej of log.ejercicios) {
-      for (const set of ej.sets) {
-        vol += (set.reps ?? 0) * (set.peso ?? 0);
-      }
-    }
-    const entry = balanceMap.get(nombre);
-    if (entry) {
-      entry.volumen += vol;
-    } else {
-      balanceMap.set(nombre, { color: log.sesionColor ?? "#6b6b72", volumen: vol });
-    }
-  }
-  const balanceSesiones: BalanceSesion[] = [...balanceMap.entries()].map(
-    ([sesion, { color, volumen }]) => ({ sesion, color, volumen }),
-  );
-
-  // ── 1RM estimado por ejercicio (Epley: peso × (1 + reps/30)) ─────────────
-  const unRmMap = new Map<string, { nombre: string; color: string; puntos: Map<string, number> }>();
-  for (const log of logs) {
-    const semana = isoWeekLabel(getISOWeek(new Date(log.fecha)));
-    for (const ej of log.ejercicios) {
-      if (!ej.ejercicioId) continue;
-      const id = String(ej.ejercicioId);
-      for (const set of ej.sets) {
-        if (!set.peso || !set.reps || set.reps === 0) continue;
-        const unRm = set.peso * (1 + set.reps / 30);
-        if (!unRmMap.has(id)) {
-          unRmMap.set(id, {
-            nombre: ej.nombre,
-            color: log.sesionColor ?? "#f4634a",
-            puntos: new Map(),
-          });
-        }
-        const entry = unRmMap.get(id)!;
-        entry.puntos.set(semana, Math.max(entry.puntos.get(semana) ?? 0, unRm));
-      }
-    }
-  }
-  const unRmEjercicios: EjercicioData[] = [...unRmMap.entries()]
-    .filter(([, v]) => v.puntos.size >= 3)
-    .sort((a, b) => b[1].puntos.size - a[1].puntos.size)
-    .slice(0, 6)
-    .map(([id, v]) => {
-      // Últimas 10 entradas (≈ 2 meses), etiquetadas S1…Sn
-      const allPuntos = [...v.puntos.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-      const ultimos10 = allPuntos.slice(-10);
-      return {
-        id,
-        nombre: v.nombre,
-        color: v.color,
-        datos: ultimos10.map(([semanaLabel, y], i) => ({
-          x: `S${i + 1}`,
-          semanaLabel,
-          y: convertirPeso(Math.round(y * 10) / 10, unidadPeso),
-        })),
-      };
-    });
-
-  // ── Plateau: ejercicios sin progreso en las últimas 4+ sesiones ───────────
-  const plateauEjMap = new Map<string, { nombre: string; registros: { fecha: Date; maxPeso: number }[] }>();
-  for (const log of logs) {
-    for (const ej of log.ejercicios) {
-      if (!ej.ejercicioId) continue;
-      const id = String(ej.ejercicioId);
-      const maxPeso = Math.max(...ej.sets.map((s) => s.peso ?? 0));
-      if (maxPeso <= 0) continue;
-      if (!plateauEjMap.has(id)) {
-        plateauEjMap.set(id, { nombre: ej.nombre, registros: [] });
-      }
-      plateauEjMap.get(id)!.registros.push({ fecha: new Date(log.fecha), maxPeso });
-    }
-  }
-  const plateaus: PlateauData[] = [];
-  for (const [, { nombre, registros }] of plateauEjMap) {
-    if (registros.length < 4) continue;
-    const sorted = registros.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
-    const ultimos = sorted.slice(-4);
-    const primero = ultimos[0];
-    const ultimo = ultimos[ultimos.length - 1];
-    if (ultimo.maxPeso <= primero.maxPeso) {
-      const semanas = Math.round(
-        (ultimo.fecha.getTime() - primero.fecha.getTime()) / (7 * 86400000),
-      );
-      if (semanas >= 2) {
-        plateaus.push({ ejercicio: nombre, semanas, ultimoPeso: ultimo.maxPeso });
-      }
-    }
-  }
-  plateaus.sort((a, b) => b.semanas - a.semanas);
-
-  // ── Distribución muscular (con cache Gemini) ──────────────────────────────
+  // ── Gráficos avanzados (solo Pro) ─────────────────────────────────────────
+  let balanceSesiones: BalanceSesion[] = [];
+  let unRmEjercicios: EjercicioData[] = [];
+  let plateaus: PlateauData[] = [];
   let musculoData: MusculoData[] = [];
-  try {
-    // 1. Recolectar nombres únicos de ejercicios del historial
-    const nombresUnicos = [
-      ...new Set(logs.flatMap((l) => l.ejercicios.map((e) => e.nombre))),
-    ];
-    const nombresNorm = nombresUnicos.map(normalizarNombre);
 
-    // 2. Buscar cache en MongoDB
-    const cacheados = await EjercicioMusculos.find({
-      nombreNorm: { $in: nombresNorm },
-    }).lean();
-    const cacheMap = new Map(cacheados.map((c) => [c.nombreNorm, c.musculos]));
-
-    // 3. Clasificar faltantes con Gemini
-    const faltantes = nombresNorm.filter((n) => !cacheMap.has(n));
-    if (faltantes.length > 0) {
-      const geminiMap = await clasificarEjercicios(faltantes);
-      // Persistir nuevos en cache
-      const docs = [...geminiMap.entries()].map(([nombreNorm, musculos]) => ({
-        nombreNorm,
-        musculos,
-        creadoEn: new Date(),
-      }));
-      if (docs.length > 0) {
-        await EjercicioMusculos.insertMany(docs, { ordered: false }).catch(() => {});
+  if (plan === "pro") {
+    // ── Balance de volumen por sesión ───────────────────────────────────────
+    const balanceMap = new Map<string, { color: string; volumen: number }>();
+    for (const log of logs) {
+      const nombre = log.sesionNombre ?? "Sin nombre";
+      let vol = 0;
+      for (const ej of log.ejercicios) {
+        for (const set of ej.sets) {
+          vol += (set.reps ?? 0) * (set.peso ?? 0);
+        }
       }
-      for (const [k, v] of geminiMap) cacheMap.set(k, v);
+      const entry = balanceMap.get(nombre);
+      if (entry) {
+        entry.volumen += vol;
+      } else {
+        balanceMap.set(nombre, { color: log.sesionColor ?? "#6b6b72", volumen: vol });
+      }
     }
+    balanceSesiones = [...balanceMap.entries()].map(
+      ([sesion, { color, volumen }]) => ({ sesion, color, volumen }),
+    );
 
-    // 4. Override con musculos[] de la rutina activa del usuario (fuente primaria)
-    const rutinaActiva = await Routine.findOne({ userId, activa: true }).lean();
-    if (rutinaActiva) {
-      for (const sesion of rutinaActiva.sesiones) {
-        for (const ej of sesion.ejercicios) {
-          if (ej.musculos && ej.musculos.length > 0) {
-            cacheMap.set(normalizarNombre(ej.nombre), ej.musculos);
+    // ── 1RM estimado por ejercicio (Epley: peso × (1 + reps/30)) ───────────
+    const unRmMap = new Map<string, { nombre: string; color: string; puntos: Map<string, number> }>();
+    for (const log of logs) {
+      const semana = isoWeekLabel(getISOWeek(new Date(log.fecha)));
+      for (const ej of log.ejercicios) {
+        if (!ej.ejercicioId) continue;
+        const id = String(ej.ejercicioId);
+        for (const set of ej.sets) {
+          if (!set.peso || !set.reps || set.reps === 0) continue;
+          const unRm = set.peso * (1 + set.reps / 30);
+          if (!unRmMap.has(id)) {
+            unRmMap.set(id, {
+              nombre: ej.nombre,
+              color: log.sesionColor ?? "#f4634a",
+              puntos: new Map(),
+            });
+          }
+          const entry = unRmMap.get(id)!;
+          entry.puntos.set(semana, Math.max(entry.puntos.get(semana) ?? 0, unRm));
+        }
+      }
+    }
+    unRmEjercicios = [...unRmMap.entries()]
+      .filter(([, v]) => v.puntos.size >= 3)
+      .sort((a, b) => b[1].puntos.size - a[1].puntos.size)
+      .slice(0, 6)
+      .map(([id, v]) => {
+        const allPuntos = [...v.puntos.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+        const ultimos10 = allPuntos.slice(-10);
+        return {
+          id,
+          nombre: v.nombre,
+          color: v.color,
+          datos: ultimos10.map(([semanaLabel, y], i) => ({
+            x: `S${i + 1}`,
+            semanaLabel,
+            y: convertirPeso(Math.round(y * 10) / 10, unidadPeso),
+          })),
+        };
+      });
+
+    // ── Plateau: ejercicios sin progreso en las últimas 4+ sesiones ─────────
+    const plateauEjMap = new Map<string, { nombre: string; registros: { fecha: Date; maxPeso: number }[] }>();
+    for (const log of logs) {
+      for (const ej of log.ejercicios) {
+        if (!ej.ejercicioId) continue;
+        const id = String(ej.ejercicioId);
+        const maxPeso = Math.max(...ej.sets.map((s) => s.peso ?? 0));
+        if (maxPeso <= 0) continue;
+        if (!plateauEjMap.has(id)) {
+          plateauEjMap.set(id, { nombre: ej.nombre, registros: [] });
+        }
+        plateauEjMap.get(id)!.registros.push({ fecha: new Date(log.fecha), maxPeso });
+      }
+    }
+    for (const [, { nombre, registros }] of plateauEjMap) {
+      if (registros.length < 4) continue;
+      const sorted = registros.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+      const ultimos = sorted.slice(-4);
+      const primero = ultimos[0];
+      const ultimo = ultimos[ultimos.length - 1];
+      if (ultimo.maxPeso <= primero.maxPeso) {
+        const semanas = Math.round(
+          (ultimo.fecha.getTime() - primero.fecha.getTime()) / (7 * 86400000),
+        );
+        if (semanas >= 2) {
+          plateaus.push({ ejercicio: nombre, semanas, ultimoPeso: ultimo.maxPeso });
+        }
+      }
+    }
+    plateaus.sort((a, b) => b.semanas - a.semanas);
+
+    // ── Distribución muscular (con cache Gemini) ────────────────────────────
+    try {
+      const nombresUnicos = [
+        ...new Set(logs.flatMap((l) => l.ejercicios.map((e) => e.nombre))),
+      ];
+      const nombresNorm = nombresUnicos.map(normalizarNombre);
+
+      const cacheados = await EjercicioMusculos.find({
+        nombreNorm: { $in: nombresNorm },
+      }).lean();
+      const cacheMap = new Map(cacheados.map((c) => [c.nombreNorm, c.musculos]));
+
+      const faltantes = nombresNorm.filter((n) => !cacheMap.has(n));
+      if (faltantes.length > 0) {
+        const geminiMap = await clasificarEjercicios(faltantes);
+        const docs = [...geminiMap.entries()].map(([nombreNorm, musculos]) => ({
+          nombreNorm,
+          musculos,
+          creadoEn: new Date(),
+        }));
+        if (docs.length > 0) {
+          await EjercicioMusculos.insertMany(docs, { ordered: false }).catch(() => {});
+        }
+        for (const [k, v] of geminiMap) cacheMap.set(k, v);
+      }
+
+      const rutinaActiva = await Routine.findOne({ userId, activa: true }).lean();
+      if (rutinaActiva) {
+        for (const sesion of rutinaActiva.sesiones) {
+          for (const ej of sesion.ejercicios) {
+            if (ej.musculos && ej.musculos.length > 0) {
+              cacheMap.set(normalizarNombre(ej.nombre), ej.musculos);
+            }
           }
         }
       }
-    }
 
-    // 5. Calcular volumen por músculo
-    const volMusculoMap = new Map<string, number>();
-    for (const log of logs) {
-      for (const ej of log.ejercicios) {
-        const norm = normalizarNombre(ej.nombre);
-        const musculos = cacheMap.get(norm);
-        if (!musculos) continue;
-        let volEj = 0;
-        for (const set of ej.sets) {
-          volEj += (set.reps ?? 0) * (set.peso ?? 0);
-        }
-        for (const m of musculos) {
-          const contrib = volEj * (m.porcentaje / 100);
-          volMusculoMap.set(m.nombre, (volMusculoMap.get(m.nombre) ?? 0) + contrib);
+      const volMusculoMap = new Map<string, number>();
+      for (const log of logs) {
+        for (const ej of log.ejercicios) {
+          const norm = normalizarNombre(ej.nombre);
+          const musculos = cacheMap.get(norm);
+          if (!musculos) continue;
+          let volEj = 0;
+          for (const set of ej.sets) {
+            volEj += (set.reps ?? 0) * (set.peso ?? 0);
+          }
+          for (const m of musculos) {
+            const contrib = volEj * (m.porcentaje / 100);
+            volMusculoMap.set(m.nombre, (volMusculoMap.get(m.nombre) ?? 0) + contrib);
+          }
         }
       }
-    }
 
-    musculoData = [...volMusculoMap.entries()]
-      .filter(([, v]) => v > 0)
-      .map(([musculo, volumen]) => ({
-        musculo,
-        volumen: convertirPeso(volumen, unidadPeso),
-      }))
-      .sort((a, b) => b.volumen - a.volumen);
-  } catch (err) {
-    console.error("[estadisticas] Error calculando distribución muscular:", err);
-    // Falla silenciosa — musculoData queda vacío
+      musculoData = [...volMusculoMap.entries()]
+        .filter(([, v]) => v > 0)
+        .map(([musculo, volumen]) => ({
+          musculo,
+          volumen: convertirPeso(volumen, unidadPeso),
+        }))
+        .sort((a, b) => b.volumen - a.volumen);
+    } catch (err) {
+      console.error("[estadisticas] Error calculando distribución muscular:", err);
+    }
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -419,7 +427,7 @@ export default async function EstadisticasPage() {
         intensidad={intensidad}
         frecuencia={frecuencia}
         unidadPeso={unidadPeso}
-        plan={session!.user.plan ?? "free"}
+        plan={plan}
         balanceSesiones={balanceSesiones}
         unRmEjercicios={unRmEjercicios}
         plateaus={plateaus}

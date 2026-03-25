@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import Header from "./Header";
+import ChatWidget from "@/components/chat/ChatWidget";
 
 export default async function AppShell({
   children,
@@ -7,6 +8,7 @@ export default async function AppShell({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  const plan = session?.user?.plan === "pro" ? "pro" : "free";
 
   return (
     <div
@@ -14,6 +16,7 @@ export default async function AppShell({
     >
       <Header userName={session?.user?.name} userImage={session?.user?.image} />
       <main className="mx-auto max-w-2xl lg:max-w-5xl px-4 py-6">{children}</main>
+      <ChatWidget plan={plan} />
     </div>
   );
 }

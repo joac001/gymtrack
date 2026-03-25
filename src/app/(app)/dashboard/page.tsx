@@ -21,7 +21,7 @@ const DIAS_ES: Record<number, string> = {
 export default async function DashboardPage() {
   const session = await auth();
   const userId = session!.user.id;
-  const plan = session?.user?.plan ?? "free";
+  const plan = session?.user?.plan === "pro" ? "pro" : "free";
 
   await connectDB();
   const rutina = await Routine.findOne({ userId, activa: true }).lean();

@@ -14,7 +14,17 @@ export async function GET(req: Request) {
   const limit = Number(searchParams.get("limit") ?? 20);
 
   await connectDB();
-  const logs = await WorkoutLog.find({ userId: session.user.id })
+
+  // Gate: free solo ve últimos 3 meses
+  const plan = session.user.plan === "pro" ? "pro" : "free";
+  const query: Record<string, unknown> = { userId: session.user.id };
+  if (plan === "free") {
+    const tresMesesAtras = new Date();
+    tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
+    query.fecha = { $gte: tresMesesAtras };
+  }
+
+  const logs = await WorkoutLog.find(query)
     .sort({ fecha: -1 })
     .limit(limit)
     .lean();

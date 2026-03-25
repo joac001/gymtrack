@@ -15,10 +15,20 @@ function calcVolumen(ejercicios: { sets: { reps: number; peso: number }[] }[]) {
 export default async function HistorialPage() {
   const session = await auth();
   const userId = session!.user.id;
+  const plan = session!.user.plan === "pro" ? "pro" : "free";
 
   await connectDB();
+
+  // Gate: free solo ve últimos 3 meses
+  const query: Record<string, unknown> = { userId };
+  if (plan === "free") {
+    const tresMesesAtras = new Date();
+    tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
+    query.fecha = { $gte: tresMesesAtras };
+  }
+
   const [logs, userDoc] = await Promise.all([
-    WorkoutLog.find({ userId }).sort({ fecha: -1 }).limit(50).lean(),
+    WorkoutLog.find(query).sort({ fecha: -1 }).limit(50).lean(),
     User.findById(userId).lean(),
   ]);
   const unidadPeso = ((userDoc as { unidadPeso?: string } | null)?.unidadPeso ?? "kg") as "kg" | "lbs";

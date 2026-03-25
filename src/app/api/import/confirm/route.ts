@@ -19,6 +19,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
+  // Gate: import solo para Pro
+  const plan = session.user.plan === "pro" ? "pro" : "free";
+  if (plan !== "pro") {
+    return NextResponse.json(
+      { error: "La importación desde Excel requiere el plan Pro" },
+      { status: 403 },
+    );
+  }
+
   const userId = session.user.id;
   const body: ConfirmPayload = await req.json();
 

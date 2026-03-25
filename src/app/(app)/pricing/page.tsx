@@ -3,7 +3,7 @@ import PricingCards from "@/components/pricing/PricingCards";
 
 export default async function PricingPage() {
   const session = await auth();
-  const plan = session?.user?.plan ?? "free";
+  const plan = session?.user?.plan === "pro" ? "pro" : "free";
 
   return (
     <div className="flex flex-col gap-6 max-w-lg mx-auto">

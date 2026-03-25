@@ -1,5 +1,5 @@
 /**
- * Seed WorkoutLogs — PPL Volumen (01 Ene 2026 → 12 Mar 2026)
+ * Seed Rutina + WorkoutLogs — PPL Volumen (01 Ene 2026 → 12 Mar 2026)
  *
  * Uso en mongosh:
  *   1. Conectate a tu base:  mongosh "mongodb+srv://..."
@@ -8,28 +8,106 @@
  *
  * O pegá el contenido directamente en la consola de mongosh.
  *
- * IMPORTANTE: borra TODOS los worklogs del usuario antes de insertar.
+ * IMPORTANTE: borra la rutina seed y TODOS los worklogs del usuario antes de insertar.
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
-const USER_ID = ""; // => userId del usuario al que quieras asignar los logs
+const USER_ID = "69c3200b2adc1db7856f7f2f"; // => userId (string del ObjectId) del usuario
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── 1. Obtener rutina activa ──────────────────────────────────────────────────
-const rutina = db.routines.findOne({ userId: USER_ID, activa: true });
-if (!rutina) {
-  print("❌  No se encontró rutina activa para el usuario.");
+if (!USER_ID) {
+  print("❌  Configurá USER_ID antes de ejecutar el script.");
   quit(1);
 }
-print("✔  Rutina: " + rutina.nombre + "  (" + rutina._id + ")");
 
-const rutinaId = rutina._id;
+// ── 1. Borrar datos previos del usuario ─────────────────────────────────────
+const borradoLogs = db.workoutlogs.deleteMany({ userId: USER_ID });
+print("🗑  Borrados: " + borradoLogs.deletedCount + " worklogs anteriores");
 
-// ── 2. Mapas de IDs por sesión (evita conflictos de nombre entre sesiones) ────
-const sesMap = {}; // nombre → { id, color }
-const ejMap = {};  // sesionNombre → { ejercicioNombre → _id }
+// Desactivar rutinas existentes
+db.routines.updateMany({ userId: USER_ID }, { $set: { activa: false } });
 
-for (const s of rutina.sesiones) {
+// ── 2. Crear rutina PPL Volumen ─────────────────────────────────────────────
+const COLORES = {
+  push: "#f4634a",
+  pull: "#3b82f6",
+  legs: "#22c55e",
+};
+
+const ahora = new Date();
+
+const rutinaDoc = {
+  userId: USER_ID,
+  nombre: "PPL Volumen",
+  activa: true,
+  sesiones: [
+    {
+      _id: new ObjectId(),
+      nombre: "Push",
+      color: COLORES.push,
+      dia: "lunes",
+      orden: 0,
+      ejercicios: [
+        { _id: new ObjectId(), nombre: "Press Banca",          grupo: "Pecho",    tipoMedida: "reps", series: 4, reps: { desde: 8, hasta: 10 }, orden: 0 },
+        { _id: new ObjectId(), nombre: "Press Inclinado",      grupo: "Pecho",    tipoMedida: "reps", series: 3, reps: { desde: 8, hasta: 10 }, orden: 1 },
+        { _id: new ObjectId(), nombre: "Aperturas Pec Deck",   grupo: "Pecho",    tipoMedida: "reps", series: 3, reps: { desde: 10, hasta: 12 }, orden: 2 },
+        { _id: new ObjectId(), nombre: "Press Militar",        grupo: "Hombros",  tipoMedida: "reps", series: 3, reps: { desde: 8, hasta: 10 }, orden: 3 },
+        { _id: new ObjectId(), nombre: "Elevaciones Laterales", grupo: "Hombros", tipoMedida: "reps", series: 3, reps: { desde: 12, hasta: 15 }, orden: 4 },
+        { _id: new ObjectId(), nombre: "Tríceps Polea",        grupo: "Tríceps",  tipoMedida: "reps", series: 3, reps: { desde: 10, hasta: 12 }, orden: 5 },
+        { _id: new ObjectId(), nombre: "Press Francés",        grupo: "Tríceps",  tipoMedida: "reps", series: 3, reps: { desde: 8, hasta: 10 }, orden: 6 },
+        { _id: new ObjectId(), nombre: "Bicicleta",            grupo: "Cardio",   tipoMedida: "tiempo", duracion: "10 min", orden: 7 },
+      ],
+    },
+    {
+      _id: new ObjectId(),
+      nombre: "Pull",
+      color: COLORES.pull,
+      dia: "miercoles",
+      orden: 1,
+      ejercicios: [
+        { _id: new ObjectId(), nombre: "Jalón",            grupo: "Espalda",  tipoMedida: "reps", series: 4, reps: { desde: 8, hasta: 10 }, orden: 0 },
+        { _id: new ObjectId(), nombre: "Remo Polea Baja",  grupo: "Espalda",  tipoMedida: "reps", series: 4, reps: { desde: 8, hasta: 10 }, orden: 1 },
+        { _id: new ObjectId(), nombre: "Remo Mancuerna",   grupo: "Espalda",  tipoMedida: "reps", series: 3, reps: { desde: 8, hasta: 10 }, orden: 2 },
+        { _id: new ObjectId(), nombre: "Face Pulls",       grupo: "Hombros",  tipoMedida: "reps", series: 3, reps: { desde: 12, hasta: 15 }, orden: 3 },
+        { _id: new ObjectId(), nombre: "Curl Barra Z",     grupo: "Bíceps",   tipoMedida: "reps", series: 3, reps: { desde: 8, hasta: 10 }, orden: 4 },
+        { _id: new ObjectId(), nombre: "Curl Martillo",    grupo: "Bíceps",   tipoMedida: "reps", series: 3, reps: { desde: 10, hasta: 12 }, orden: 5 },
+        { _id: new ObjectId(), nombre: "Elíptica",         grupo: "Cardio",   tipoMedida: "tiempo", duracion: "10 min", orden: 6 },
+      ],
+    },
+    {
+      _id: new ObjectId(),
+      nombre: "Legs + Core",
+      color: COLORES.legs,
+      dia: "viernes",
+      orden: 2,
+      ejercicios: [
+        { _id: new ObjectId(), nombre: "Sentadilla Smith",    grupo: "Cuádriceps", tipoMedida: "reps", series: 4, reps: { desde: 8, hasta: 10 }, orden: 0 },
+        { _id: new ObjectId(), nombre: "Prensa",              grupo: "Cuádriceps", tipoMedida: "reps", series: 3, reps: { desde: 10, hasta: 12 }, orden: 1 },
+        { _id: new ObjectId(), nombre: "Extensión Cuáds",     grupo: "Cuádriceps", tipoMedida: "reps", series: 3, reps: { desde: 12, hasta: 15 }, orden: 2 },
+        { _id: new ObjectId(), nombre: "Peso Muerto Rumano",  grupo: "Isquios",    tipoMedida: "reps", series: 3, reps: { desde: 8, hasta: 10 }, orden: 3 },
+        { _id: new ObjectId(), nombre: "Curl Isquios",        grupo: "Isquios",    tipoMedida: "reps", series: 3, reps: { desde: 10, hasta: 12 }, orden: 4 },
+        { _id: new ObjectId(), nombre: "Hip Thrust",           grupo: "Glúteos",    tipoMedida: "reps", series: 3, reps: { desde: 10, hasta: 12 }, orden: 5 },
+        { _id: new ObjectId(), nombre: "Plancha",             grupo: "Core",       tipoMedida: "tiempo", duracion: "45s", orden: 6 },
+        { _id: new ObjectId(), nombre: "Dead Bug",            grupo: "Core",       tipoMedida: "reps", series: 3, reps: { desde: 8 }, orden: 7 },
+        { _id: new ObjectId(), nombre: "Crunch Máquina",      grupo: "Core",       tipoMedida: "reps", series: 3, reps: { desde: 12, hasta: 15 }, orden: 8 },
+        { _id: new ObjectId(), nombre: "Bicicleta",           grupo: "Cardio",     tipoMedida: "tiempo", duracion: "10 min", orden: 9 },
+      ],
+    },
+  ],
+  creadoEn: ahora,
+  actualizadoEn: ahora,
+};
+
+db.routines.insertOne(rutinaDoc);
+print("✔  Rutina creada: " + rutinaDoc.nombre);
+
+// ── 3. Mapas de IDs ─────────────────────────────────────────────────────────
+const rutinaId = rutinaDoc._id || db.routines.findOne({ userId: USER_ID, activa: true })._id;
+
+const sesMap = {};
+const ejMap = {};
+
+for (const s of rutinaDoc.sesiones) {
   sesMap[s.nombre] = { id: s._id, color: s.color };
   ejMap[s.nombre] = {};
   for (const e of s.ejercicios) {
@@ -37,11 +115,11 @@ for (const s of rutina.sesiones) {
   }
 }
 
-function sId(ses)       { return sesMap[ses].id; }
-function sColor(ses)    { return sesMap[ses].color; }
-function eId(ses, ej)   { return ejMap[ses][ej]; }
+function sId(ses)     { return sesMap[ses].id; }
+function sColor(ses)  { return sesMap[ses].color; }
+function eId(ses, ej) { return ejMap[ses][ej]; }
 
-// ── 3. Helpers ────────────────────────────────────────────────────────────────
+// ── 4. Helpers ──────────────────────────────────────────────────────────────
 function sets(n, reps, peso) {
   return Array.from({ length: n }, () => ({ reps: reps, peso: peso }));
 }
@@ -49,50 +127,50 @@ function d(y, m, day) {
   return new Date(Date.UTC(y, m - 1, day, 10, 0, 0));
 }
 
-// ── 4. Tablas de pesos progresivos ────────────────────────────────────────────
+// ── 5. Tablas de pesos progresivos ──────────────────────────────────────────
 //
 // PUSH (9 sesiones)
 // Cols: [pressBanca, pressIncl, aperturas, presMilitar, elevLat, tricepsPolea, pressFrances]
 const WP = [
-  [60,   50,   40,   42.5, 10, 22.5, 30  ], // P1 — Sem 1
-  [60,   50,   40,   42.5, 10, 22.5, 30  ], // P2 — Sem 2
-  [60,   50,   42.5, 42.5, 10, 22.5, 30  ], // P3 — Sem 3
-  [62.5, 52.5, 42.5, 45,   10, 25,   32.5], // P4 — Sem 4 (1 día)
-  [62.5, 52.5, 42.5, 45,   12, 25,   32.5], // P5 — Sem 5
-  [62.5, 52.5, 45,   45,   12, 25,   32.5], // P6 — Sem 6
-  [65,   55,   45,   47.5, 12, 27.5, 35  ], // P7 — Sem 7
-  [65,   55,   45,   47.5, 12, 27.5, 35  ], // P8 — Sem 9
-  [67.5, 57.5, 47.5, 47.5, 14, 27.5, 35  ], // P9 — Sem 10
+  [60,   50,   40,   42.5, 10, 22.5, 30  ],
+  [60,   50,   40,   42.5, 10, 22.5, 30  ],
+  [60,   50,   42.5, 42.5, 10, 22.5, 30  ],
+  [62.5, 52.5, 42.5, 45,   10, 25,   32.5],
+  [62.5, 52.5, 42.5, 45,   12, 25,   32.5],
+  [62.5, 52.5, 45,   45,   12, 25,   32.5],
+  [65,   55,   45,   47.5, 12, 27.5, 35  ],
+  [65,   55,   45,   47.5, 12, 27.5, 35  ],
+  [67.5, 57.5, 47.5, 47.5, 14, 27.5, 35  ],
 ];
 
 // PULL (9 sesiones)
 // Cols: [jalon, remoPolea, remoManc, facePulls, curlBarra, curlMart]
-// ⚠ Curl Barra Z se estanca en 35 desde L6 → L9 (plateau ~3 semanas)
+// Curl Barra Z se estanca en 35 desde L6 → L9
 const WL = [
-  [55,   55,   22.5, 15,   30,   14], // L1 — Sem 1
-  [55,   55,   22.5, 15,   30,   14], // L2 — Sem 2
-  [57.5, 55,   24,   15,   30,   14], // L3 — Sem 3
-  [57.5, 57.5, 24,   17.5, 32.5, 16], // L4 — Sem 5
-  [57.5, 57.5, 24,   17.5, 32.5, 16], // L5 — Sem 6
-  [60,   57.5, 26,   17.5, 35,   16], // L6 — Sem 7  ← curlBarra sube a 35 y se queda
-  [60,   60,   26,   20,   35,   18], // L7 — Sem 8 (1 día)
-  [62.5, 60,   26,   20,   35,   18], // L8 — Sem 9
-  [62.5, 62.5, 28,   20,   35,   18], // L9 — Sem 10  ← curlBarra sin avance
+  [55,   55,   22.5, 15,   30,   14],
+  [55,   55,   22.5, 15,   30,   14],
+  [57.5, 55,   24,   15,   30,   14],
+  [57.5, 57.5, 24,   17.5, 32.5, 16],
+  [57.5, 57.5, 24,   17.5, 32.5, 16],
+  [60,   57.5, 26,   17.5, 35,   16],
+  [60,   60,   26,   20,   35,   18],
+  [62.5, 60,   26,   20,   35,   18],
+  [62.5, 62.5, 28,   20,   35,   18],
 ];
 
 // LEGS (6 sesiones)
 // Cols: [sentSmith, prensa, extCuads, pMuerto, curlIsq, hipThrust, crunchMaq]
-// ⚠ Hip Thrust se estanca en 65 desde G3 → G6 (plateau ~6 semanas)
+// Hip Thrust se estanca en 65 desde G3 → G6
 const WG = [
-  [60,   100, 35,   55,   30,   60,   30  ], // G1 — Sem 1
-  [62.5, 100, 35,   57.5, 30,   62.5, 30  ], // G2 — Sem 2
-  [62.5, 105, 37.5, 57.5, 32.5, 65,   32.5], // G3 — Sem 3  ← hipThrust sube a 65 y se queda
-  [65,   105, 37.5, 60,   32.5, 65,   35  ], // G4 — Sem 5
-  [65,   110, 40,   60,   35,   65,   35  ], // G5 — Sem 7
-  [67.5, 110, 40,   62.5, 35,   65,   37.5], // G6 — Sem 9  ← hipThrust sin avance
+  [60,   100, 35,   55,   30,   60,   30  ],
+  [62.5, 100, 35,   57.5, 30,   62.5, 30  ],
+  [62.5, 105, 37.5, 57.5, 32.5, 65,   32.5],
+  [65,   105, 37.5, 60,   32.5, 65,   35  ],
+  [65,   110, 40,   60,   35,   65,   35  ],
+  [67.5, 110, 40,   62.5, 35,   65,   37.5],
 ];
 
-// ── 5. Builders ───────────────────────────────────────────────────────────────
+// ── 6. Builders ─────────────────────────────────────────────────────────────
 function mkPush(fecha, i, intensidad) {
   const w = WP[i];
   const S = "Push";
@@ -154,11 +232,7 @@ function mkLegs(fecha, i, intensidad) {
   };
 }
 
-// ── 6. Borrar worklogs existentes ─────────────────────────────────────────────
-const borrado = db.workoutlogs.deleteMany({ userId: USER_ID });
-print("🗑  Borrados: " + borrado.deletedCount + " worklogs anteriores");
-
-// ── 7. Schedule ───────────────────────────────────────────────────────────────
+// ── 7. Schedule ─────────────────────────────────────────────────────────────
 //
 //  Sem 01 (3d) — 05, 07, 09 Ene   Push P1, Pull L1, Legs G1
 //  Sem 02 (3d) — 12, 14, 16 Ene   Push P2, Pull L2, Legs G2
@@ -208,12 +282,13 @@ const logs = [
   mkPull(d(2026, 3, 11), 8, 8),
 ];
 
-// ── 8. Insertar ───────────────────────────────────────────────────────────────
+// ── 8. Insertar ─────────────────────────────────────────────────────────────
 const res = db.workoutlogs.insertMany(logs);
 const insertados = Object.keys(res.insertedIds).length;
 print("✅  Insertados: " + insertados + " worklogs");
 print("");
 print("Resumen:");
+print("  Rutina:    PPL Volumen (activa)");
 print("  Push:      9 sesiones (P1–P9)");
 print("  Pull:      9 sesiones (L1–L9)");
 print("  Legs+Core: 6 sesiones (G1–G6)");

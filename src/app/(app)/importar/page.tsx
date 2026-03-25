@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Sparkles } from "lucide-react";
+import Link from "next/link";
 import type {
   PreguntaImport,
   RespuestaRonda,
@@ -17,6 +20,36 @@ import ReviewStep from "@/components/importar/ReviewStep";
 type Paso = "upload" | "preguntas" | "review" | "exito";
 
 export default function ImportarPage() {
+  const { data: session } = useSession();
+  const plan = session?.user?.plan === "pro" ? "pro" : "free";
+
+  if (plan !== "pro") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-16 px-6 text-center">
+        <Sparkles size={32} style={{ color: "var(--push)" }} />
+        <h2
+          className="text-[1.4rem] m-0 tracking-wider"
+          style={{ fontFamily: "var(--font-bebas)", color: "var(--text)" }}
+        >
+          Importar Excel es Pro
+        </h2>
+        <p className="text-[0.85rem] m-0" style={{ color: "var(--text-muted)" }}>
+          Subí tu planilla de Excel y nuestra IA la convierte en rutinas y registros automáticamente.
+        </p>
+        <Link
+          href="/pricing"
+          className="text-[0.85rem] font-semibold no-underline px-5 py-2.5 mt-2"
+          style={{
+            background: "var(--push)",
+            color: "#fff",
+            borderRadius: "var(--radius-md)",
+          }}
+        >
+          Ver planes →
+        </Link>
+      </div>
+    );
+  }
   const router = useRouter();
 
   const [paso, setPaso] = useState<Paso>("upload");
